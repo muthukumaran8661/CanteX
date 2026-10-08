@@ -4001,3 +4001,945 @@ button, select, input {
 
 
 
+
+
+/* ============================================================
+   MOBILE RESPONSIVE SYSTEM
+   Smart Canteen – Full Mobile / Tablet Support
+   320px | 375px | 390px | 430px | 768px | 1366px
+   ============================================================ */
+
+/* ── Global Safe Overflow & Touch Targets ─────────────────── */
+html, body {
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+* {
+  -webkit-tap-highlight-color: rgba(200, 16, 46, 0.12);
+}
+
+/* Touch-friendly minimum size for all interactive elements */
+button, a, select, input[type="text"], input[type="email"],
+input[type="password"], input[type="number"] {
+  min-height: 44px;
+}
+
+/* ── Tablet: 481px – 768px ────────────────────────────────── */
+@media (max-width: 768px) {
+
+  /* Header */
+  .header-container {
+    padding: 10px 16px;
+    gap: 10px;
+    flex-wrap: nowrap;
+  }
+
+  .brand-subtitle {
+    display: none;
+  }
+
+  .brand-title {
+    font-size: 1rem;
+  }
+
+  .brand-icon-box {
+    width: 38px;
+    height: 38px;
+    font-size: 1.3rem;
+  }
+
+  /* Hide location pill on tablet to save space */
+  .swiggy-location-pill {
+    display: none;
+  }
+
+  /* Auth buttons hidden on ≤768px (accessible from drawer) */
+  .header-auth-actions {
+    display: none;
+  }
+
+  /* Keep cart button always visible */
+  .nav-cart-btn {
+    padding: 8px 12px;
+    font-size: 0.85rem;
+    gap: 6px;
+  }
+
+  .cart-btn-txt {
+    display: none;
+  }
+
+  /* Hamburger always visible */
+  .hamburger-btn {
+    display: flex;
+  }
+
+  /* Section containers */
+  .section-container {
+    padding: 24px 16px;
+  }
+
+  .section-title {
+    font-size: 1.5rem;
+  }
+
+  .section-header-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  /* Specials / combos: 2 columns on tablet */
+  .specials-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  /* Food cards: 2 columns */
+  .food-cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  /* Hero */
+  .swiggy-hero-container {
+    padding: 24px 16px 20px;
+  }
+
+  .swiggy-hero-heading {
+    font-size: clamp(1.6rem, 5vw, 2.2rem);
+  }
+
+  .swiggy-hero-search-box {
+    flex-direction: column;
+    border-radius: 16px;
+    gap: 0;
+  }
+
+  .hero-counter-selector {
+    border-right: none;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 12px 16px;
+  }
+
+  .hero-search-divider {
+    display: none;
+  }
+
+  .hero-search-input-wrap {
+    padding: 12px 16px;
+  }
+
+  .hero-search-input {
+    font-size: 0.9rem;
+  }
+
+  .hero-search-submit-btn {
+    display: none;
+  }
+
+  .swiggy-perks-row {
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .swiggy-perk-badge {
+    font-size: 0.75rem;
+    padding: 6px 10px;
+  }
+
+  /* Cart page */
+  .cart-row-item {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .cart-row-img {
+    width: 52px;
+    height: 52px;
+  }
+
+  .cart-actions-row,
+  .checkout-btn-group {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .cart-actions-row .btn-secondary,
+  .cart-actions-row .btn-primary,
+  .checkout-btn-group .btn-secondary,
+  .checkout-btn-group .btn-primary {
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+  }
+
+  /* Checkout & payment cards */
+  .cart-layout-card,
+  .checkout-review-card,
+  .payment-card-box,
+  .token-confirmation-card,
+  .tracking-card {
+    padding: 18px 14px;
+    border-radius: 16px;
+  }
+
+  /* Payment options */
+  .pay-options-list {
+    gap: 10px;
+  }
+
+  .pay-option-card {
+    padding: 12px 14px;
+  }
+
+  /* Token CTA group */
+  .token-cta-group {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .token-cta-group .btn-primary,
+  .token-cta-group .btn-secondary {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Token number hero */
+  .token-number-hero {
+    font-size: clamp(3rem, 15vw, 5rem);
+  }
+
+  /* Track order */
+  .track-input-row {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .track-input-row input {
+    width: 100%;
+  }
+
+  .track-input-row button {
+    width: 100%;
+  }
+
+  /* Queue position badges */
+  .token-queue-indicator {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  /* Orders table → card layout via overflow */
+  .orders-table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 12px;
+    border: 1px solid var(--border-light);
+  }
+
+  /* Chiclet carousel */
+  .swiggy-chiclet-section {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .swiggy-chiclet-track {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .chiclet-item {
+    min-width: 70px;
+  }
+
+  /* Menu filter bar */
+  .menu-filter-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .search-box-wrap {
+    min-width: 100%;
+    width: 100%;
+  }
+
+  .sort-box-wrap {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .sort-select {
+    flex: 1;
+  }
+
+  /* Page titles */
+  .page-main-title {
+    font-size: 1.6rem;
+  }
+
+  /* pickup counter banner */
+  .pickup-counter-banner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  /* Student live board grid */
+  .board-grid-compact {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  /* Auth modal */
+  .auth-modal-card {
+    width: 95%;
+    padding: 22px 18px;
+  }
+
+  .guest-modal-card {
+    width: 92%;
+    padding: 28px 20px;
+  }
+}
+
+/* ── Mobile: ≤ 480px ─────────────────────────────────────── */
+@media (max-width: 480px) {
+
+  /* Header compacted */
+  .header-container {
+    padding: 8px 12px;
+    gap: 8px;
+  }
+
+  .brand-icon-box {
+    width: 34px;
+    height: 34px;
+    font-size: 1.1rem;
+    border-radius: 8px;
+  }
+
+  .brand-title {
+    font-size: 0.9rem;
+  }
+
+  .nav-cart-btn {
+    padding: 7px 10px;
+    font-size: 0.82rem;
+  }
+
+  .cart-btn-badge {
+    min-width: 18px;
+    height: 18px;
+    font-size: 0.68rem;
+  }
+
+  /* Hero section: single column, compact */
+  .swiggy-hero-container {
+    padding: 18px 12px 16px;
+  }
+
+  .swiggy-hero-top-strip {
+    flex-direction: column;
+    gap: 4px;
+    text-align: center;
+  }
+
+  .swiggy-hero-heading {
+    font-size: clamp(1.35rem, 7vw, 1.8rem);
+    line-height: 1.2;
+  }
+
+  .swiggy-hero-subheading {
+    font-size: 0.85rem;
+  }
+
+  .swiggy-perks-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .swiggy-perk-badge {
+    font-size: 0.72rem;
+    padding: 6px 8px;
+    text-align: center;
+    justify-content: center;
+  }
+
+  /* Section containers */
+  .section-container {
+    padding: 18px 12px;
+  }
+
+  .section-title {
+    font-size: 1.3rem;
+  }
+
+  .section-subtitle {
+    font-size: 0.88rem;
+  }
+
+  /* Specials: 1 column on phone */
+  .specials-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .special-combo-img-wrap {
+    height: 180px;
+  }
+
+  /* Food cards: 1 column on smallest phones, 2 on normal */
+  .food-cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  /* Food card compact */
+  .food-card-img-wrap {
+    height: 110px;
+  }
+
+  .food-title {
+    font-size: 0.88rem;
+  }
+
+  .food-price {
+    font-size: 0.95rem;
+  }
+
+  .food-rating-stars {
+    font-size: 0.7rem;
+  }
+
+  .food-card-body {
+    padding: 8px;
+  }
+
+  .food-card-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+  }
+
+  .btn-card-add {
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+    padding: 9px 10px;
+  }
+
+  .food-stepper {
+    justify-content: center;
+  }
+
+  /* Cart rows */
+  .cart-row-img {
+    width: 46px;
+    height: 46px;
+    border-radius: 8px;
+  }
+
+  .cart-row-name {
+    font-size: 0.88rem;
+  }
+
+  .cart-row-subtotal {
+    font-size: 0.92rem;
+    min-width: 48px;
+  }
+
+  /* Bill summary */
+  .bill-line {
+    font-size: 0.88rem;
+  }
+
+  .bill-line.bill-total-line {
+    font-size: 1.1rem;
+  }
+
+  .cart-bill-summary {
+    padding: 14px 12px;
+  }
+
+  /* Checkout */
+  .checkout-total-row {
+    font-size: 1rem;
+  }
+
+  .checkout-notice {
+    font-size: 0.8rem;
+    padding: 8px 10px;
+  }
+
+  /* Payment */
+  .pay-amount-banner {
+    padding: 16px;
+  }
+
+  .pay-amount-huge {
+    font-size: clamp(2rem, 10vw, 2.8rem) !important;
+  }
+
+  .pay-option-card {
+    padding: 10px 12px;
+  }
+
+  .pay-opt-title {
+    font-size: 0.9rem;
+  }
+
+  .pay-opt-sub {
+    font-size: 0.78rem;
+  }
+
+  .btn-pay-now {
+    font-size: 1rem;
+    padding: 14px 20px;
+    width: 100%;
+  }
+
+  .upi-input {
+    font-size: 0.9rem;
+  }
+
+  /* Token view */
+  .token-success-badge {
+    font-size: 0.8rem;
+    padding: 6px 14px;
+  }
+
+  .token-number-hero {
+    font-size: clamp(2.5rem, 14vw, 4rem);
+    letter-spacing: 2px;
+  }
+
+  .token-header-lbl {
+    font-size: 0.7rem;
+    letter-spacing: 1px;
+  }
+
+  .token-sub-details {
+    font-size: 0.82rem;
+  }
+
+  /* Track view */
+  .track-search-box {
+    padding: 14px;
+  }
+
+  .track-input-row {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .track-input-row input {
+    width: 100%;
+  }
+
+  .track-input-row button {
+    width: 100%;
+  }
+
+  /* Orders history */
+  .order-history-card {
+    padding: 14px;
+  }
+
+  /* Page titles */
+  .page-main-title {
+    font-size: 1.4rem;
+  }
+
+  .page-main-subtitle {
+    font-size: 0.88rem;
+  }
+
+  /* Category pills scroll on mobile */
+  .menu-category-pills {
+    gap: 8px;
+    padding-bottom: 12px;
+  }
+
+  .cat-pill-btn {
+    padding: 7px 14px;
+    font-size: 0.82rem;
+  }
+
+  /* Student live board: 1 column */
+  .board-grid-compact {
+    grid-template-columns: 1fr !important;
+  }
+
+  .student-live-board {
+    border-radius: 16px;
+  }
+
+  /* Auth modal */
+  .auth-modal-card {
+    width: 96%;
+    padding: 18px 14px;
+    border-radius: 16px;
+  }
+
+  .auth-tab-btn {
+    font-size: 0.95rem;
+    padding: 6px 8px;
+  }
+
+  .auth-form-field input {
+    font-size: 1rem; /* prevent iOS zoom */
+    padding: 12px 14px;
+  }
+
+  .guest-modal-card {
+    width: 94%;
+    padding: 24px 16px;
+    border-radius: 16px;
+  }
+
+  .guest-modal-title {
+    font-size: 1.2rem;
+  }
+
+  .demo-shortcuts-chips {
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .demo-user-chip {
+    text-align: center;
+  }
+
+  /* Drawer should be full width on tiny phones */
+  .mobile-drawer {
+    width: min(300px, 88vw);
+  }
+
+  /* Chiclet carousel */
+  .chiclet-name {
+    font-size: 0.72rem;
+  }
+
+  .chiclet-circle-box {
+    width: 56px;
+    height: 56px;
+  }
+
+  .chiclet-emoji {
+    font-size: 1.5rem;
+  }
+
+  /* Edit modal */
+  .edit-modal-box {
+    padding: 20px 16px;
+    border-radius: 16px;
+  }
+
+  .edit-add-item-row {
+    flex-direction: column;
+  }
+
+  /* Floating badges on hero – hide on very small screens */
+  .floating-badge {
+    display: none;
+  }
+}
+
+/* ── Tiny phones: ≤ 360px ─────────────────────────────────── */
+@media (max-width: 360px) {
+  .food-cards-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .specials-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .swiggy-perks-row {
+    grid-template-columns: 1fr;
+  }
+
+  .brand-title {
+    font-size: 0.82rem;
+    letter-spacing: 0;
+  }
+}
+
+/* ── Admin Dashboard Mobile Responsive ────────────────────── */
+@media (max-width: 768px) {
+
+  /* Admin sidebar becomes a top mobile header */
+  body.admin-body {
+    flex-direction: column;
+  }
+
+  .admin-sidebar {
+    position: relative;
+    width: 100%;
+    height: auto;
+    bottom: auto;
+    left: auto;
+    right: auto;
+    flex-direction: row;
+    align-items: center;
+    padding: 0;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  }
+
+  .sidebar-brand {
+    padding: 12px 16px;
+    border-bottom: none;
+    border-right: 1px solid rgba(255,255,255,0.08);
+    flex-shrink: 0;
+  }
+
+  .sidebar-brand-text small {
+    display: none;
+  }
+
+  .sidebar-nav {
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    padding: 0 8px;
+    gap: 4px;
+    flex: 1;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .sidebar-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .nav-item-admin {
+    flex-direction: column;
+    gap: 2px;
+    padding: 8px 10px;
+    white-space: nowrap;
+    font-size: 0.72rem;
+    border-radius: 8px;
+    border-left: none;
+    border-bottom: 3px solid transparent;
+    min-width: fit-content;
+  }
+
+  .nav-item-admin.active {
+    border-left: none;
+    border-bottom-color: #b91c1c;
+  }
+
+  .nav-item-admin .nav-icon {
+    font-size: 1.2rem;
+  }
+
+  .sidebar-footer {
+    display: none;
+  }
+
+  /* Admin main content takes full width */
+  .admin-main-content {
+    margin-left: 0 !important;
+    width: 100%;
+  }
+
+  .admin-top-bar {
+    padding: 12px 16px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .admin-top-bar h1 {
+    font-size: 1.1rem;
+  }
+
+  /* Admin KPI cards: 2 columns */
+  .kpi-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px;
+  }
+
+  .kpi-card {
+    padding: 16px 14px;
+  }
+
+  .kpi-value {
+    font-size: 1.6rem !important;
+  }
+
+  /* Station grid: 1 column */
+  .stations-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Admin tables: horizontal scroll */
+  .admin-table-wrap,
+  table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    white-space: nowrap;
+    width: 100%;
+  }
+
+  /* Admin section padding */
+  .admin-section {
+    padding: 16px 12px;
+  }
+
+  .admin-section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  /* Live token board in admin: 2 columns */
+  .live-token-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px;
+  }
+
+  /* Order management cards */
+  .order-card {
+    padding: 14px;
+  }
+
+  .order-card-header {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .task-station-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .order-actions-bar {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .btn-order-edit,
+  .btn-order-cancel {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+
+  /* Admin KPI: 1 column on tiny phones */
+  .kpi-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Admin live token board: 1 column */
+  .live-token-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .admin-top-bar h1 {
+    font-size: 1rem;
+  }
+
+  .kpi-card {
+    padding: 14px 12px;
+  }
+}
+
+/* ── Staff / Sign-In Page Mobile ─────────────────────────── */
+@media (max-width: 768px) {
+  .staff-layout,
+  .staff-content {
+    max-width: 100%;
+    padding: 16px;
+  }
+
+  .staff-queue-grid,
+  .station-grid {
+    grid-template-columns: 1fr !important;
+    gap: 14px;
+  }
+
+  .staff-order-row {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .staff-table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .staff-action-bar {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .staff-action-bar button {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* ── Sticky Mobile Cart Footer Bar ───────────────────────── */
+@media (max-width: 768px) {
+  /* Floating bottom cart button when items are in cart */
+  .mobile-cart-fab {
+    position: fixed;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, var(--brand-red), var(--brand-red-dark));
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-pill);
+    padding: 14px 32px;
+    font-size: 1rem;
+    font-weight: 800;
+    box-shadow: 0 8px 24px rgba(200, 16, 46, 0.45);
+    cursor: pointer;
+    z-index: 150;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    white-space: nowrap;
+    animation: fabPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  @keyframes fabPop {
+    from { transform: translateX(-50%) scale(0.8); opacity: 0; }
+    to   { transform: translateX(-50%) scale(1);   opacity: 1; }
+  }
+
+  .mobile-cart-fab.hidden {
+    display: none;
+  }
+}
+
+/* ── Safe Area Insets (iPhone X+ notch) ──────────────────── */
+@supports (padding-top: env(safe-area-inset-top)) {
+  .top-header {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .app-main {
+    padding-bottom: calc(80px + env(safe-area-inset-bottom));
+  }
+}
+
+/* ── Print: hide nav & cart ──────────────────────────────── */
+@media print {
+  .top-header,
+  .mobile-drawer,
+  .nav-cart-btn,
+  .hamburger-btn,
+  .mobile-cart-fab {
+    display: none !important;
+  }
+}
