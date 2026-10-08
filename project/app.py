@@ -142,6 +142,26 @@ def admin_dashboard_page():
     return send_from_directory("static", "admin.html")
 
 
+# ── PWA Routes (must be at root scope for SW registration) ───────────────
+
+@app.route("/sw.js")
+def service_worker():
+    """Serve PWA Service Worker at root scope (/sw.js) — required for scope:'/' to work."""
+    response = send_from_directory("static", "sw.js")
+    response.headers["Content-Type"] = "application/javascript"
+    response.headers["Service-Worker-Allowed"] = "/"
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    return response
+
+
+@app.route("/manifest.json")
+def pwa_manifest():
+    """Serve PWA manifest at canonical root path."""
+    response = send_from_directory("static", "manifest.json")
+    response.headers["Content-Type"] = "application/manifest+json"
+    return response
+
+
 # ── Authentication API Endpoints ──────────────────────────────────────────
 
 @app.route("/api/auth/login", methods=["POST"])

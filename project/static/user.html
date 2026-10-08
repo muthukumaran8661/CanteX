@@ -10,7 +10,9 @@
   <meta name="apple-mobile-web-app-title" content="Smart Canteen" />
   <title>SMART CANTEEN – Fresh. Fast. Traditional.</title>
   <meta name="description" content="Premium fast-food restaurant ordering web application for Smart Canteen. Authentic Tamil Nadu dishes, instant live tokens, and zero queue waiting." />
-  <link rel="manifest" href="/static/manifest.json" />
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="apple-touch-icon" sizes="192x192" href="/static/icon-192.png" />
+  <link rel="apple-touch-icon" sizes="512x512" href="/static/icon-512.png" />
   <link rel="stylesheet" href="/static/style.css" />
 </head>
 <body>
@@ -1164,8 +1166,177 @@
   </div>
 </div>
 
+<!-- ══ PWA Install Banner ══════════════════════════════════════════ -->
+<div id="pwaBanner" class="pwa-install-banner" style="display:none;" role="complementary" aria-label="Install Smart Canteen app">
+  <div class="pwa-banner-inner">
+    <div class="pwa-banner-left">
+      <img src="/static/icon-192.png" alt="Smart Canteen Icon" class="pwa-banner-icon" />
+      <div class="pwa-banner-text">
+        <strong>Smart Canteen</strong>
+        <span>Install for faster ordering</span>
+      </div>
+    </div>
+    <div class="pwa-banner-actions">
+      <button id="pwaInstallBtn" class="pwa-btn-install" onclick="triggerPwaInstall()">
+        📲 Install App
+      </button>
+      <button class="pwa-btn-dismiss" onclick="dismissPwaBanner()" aria-label="Dismiss install prompt">✕</button>
+    </div>
+  </div>
+  <!-- iOS fallback message (shown only on iOS where beforeinstallprompt is unavailable) -->
+  <div id="pwaIosFallback" class="pwa-ios-hint" style="display:none;">
+    📱 To install: tap <strong>Share</strong> → <strong>Add to Home Screen</strong> in Safari.
+  </div>
+</div>
+
 <!-- Scripts -->
 <script src="/static/app.js"></script>
+
+<script>
+/* ================================================================
+   Smart Canteen PWA – Service Worker Registration & Install Prompt
+   ================================================================ */
+(function() {
+  'use strict';
+
+  let deferredInstallPrompt = null;
+  const BANNER_DISMISSED_KEY = 'sc_pwa_banner_dismissed';
+  const INSTALLED_KEY = 'sc_pwa_installed';
+
+  // ── Detect if already running in standalone mode ────────────────
+  const isStandalone = (
+    window.matchMedia('(display-mode: standalone)').matches ||
+    window.navigator.standalone === true ||
+    document.referrer.includes('android-app://')
+  );
+
+  if (isStandalone) {
+    // Running as installed PWA — remove any install UI
+    localStorage.setItem(INSTALLED_KEY, '1');
+    hidePwaBanner();
+    return;
+  }
+
+  // ── Register Service Worker ─────────────────────────────────────
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+      navigator.serviceWorker.register('/sw.js', { scope: '/' })
+        .then(function(reg) {
+          console.log('[PWA] Service Worker registered. Scope:', reg.scope);
+
+          // Listen for new SW versions
+          reg.addEventListener('updatefound', function() {
+            const newWorker = reg.installing;
+            if (newWorker) {
+              newWorker.addEventListener('statechange', function() {
+                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                  console.log('[PWA] New version available. Refresh to update.');
+                }
+              });
+            }
+          });
+        })
+        .catch(function(err) {
+          console.warn('[PWA] Service Worker registration failed:', err);
+        });
+    });
+  }
+
+  // ── Intercept browser install prompt (Android Chrome / Edge) ────
+  window.addEventListener('beforeinstallprompt', function(e) {
+    e.preventDefault(); // Stop browser's default mini-bar
+    deferredInstallPrompt = e;
+    console.log('[PWA] Install prompt captured.');
+
+    // Only show if not previously dismissed and not installed
+    if (!localStorage.getItem(BANNER_DISMISSED_KEY) && !localStorage.getItem(INSTALLED_KEY)) {
+      showPwaBanner(false); // false = not iOS
+    }
+  });
+
+  // ── After app installed ──────────────────────────────────────────
+  window.addEventListener('appinstalled', function() {
+    console.log('[PWA] App installed successfully!');
+    localStorage.setItem(INSTALLED_KEY, '1');
+    deferredInstallPrompt = null;
+    hidePwaBanner();
+  });
+
+  // ── iOS Detection (Safari doesn't fire beforeinstallprompt) ─────
+  window.addEventListener('DOMContentLoaded', function() {
+    const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    const isSafari = /safari/i.test(navigator.userAgent) && !/chrome/i.test(navigator.userAgent);
+    const alreadyDismissed = localStorage.getItem(BANNER_DISMISSED_KEY);
+    const alreadyInstalled = localStorage.getItem(INSTALLED_KEY);
+
+    if (isIos && isSafari && !alreadyDismissed && !alreadyInstalled && !isStandalone) {
+      // Show iOS fallback hint
+      setTimeout(function() { showPwaBanner(true); }, 2000);
+    }
+  });
+
+  // ── Banner control functions ────────────────────────────────────
+  function showPwaBanner(isIos) {
+    const banner = document.getElementById('pwaBanner');
+    if (!banner) return;
+    const iosFallback = document.getElementById('pwaIosFallback');
+    const installBtn = document.getElementById('pwaInstallBtn');
+
+    if (isIos) {
+      if (installBtn) installBtn.style.display = 'none';
+      if (iosFallback) iosFallback.style.display = 'block';
+    } else {
+      if (installBtn) installBtn.style.display = 'flex';
+      if (iosFallback) iosFallback.style.display = 'none';
+    }
+
+    banner.style.display = 'block';
+    // Animate in
+    requestAnimationFrame(function() {
+      banner.classList.add('pwa-banner-visible');
+    });
+  }
+
+  function hidePwaBanner() {
+    const banner = document.getElementById('pwaBanner');
+    if (!banner) return;
+    banner.classList.remove('pwa-banner-visible');
+    setTimeout(function() { banner.style.display = 'none'; }, 350);
+  }
+
+  // Expose to global scope for onclick handlers
+  window.triggerPwaInstall = function() {
+    if (!deferredInstallPrompt) {
+      // No captured prompt — show fallback
+      const iosFallback = document.getElementById('pwaIosFallback');
+      const installBtn = document.getElementById('pwaInstallBtn');
+      if (installBtn) installBtn.style.display = 'none';
+      if (iosFallback) {
+        iosFallback.style.display = 'block';
+        iosFallback.textContent = '⚠️ To install Smart Canteen, use your browser\'s "Add to Home Screen" option.';
+      }
+      return;
+    }
+    deferredInstallPrompt.prompt();
+    deferredInstallPrompt.userChoice.then(function(result) {
+      console.log('[PWA] User choice:', result.outcome);
+      if (result.outcome === 'accepted') {
+        localStorage.setItem(INSTALLED_KEY, '1');
+        hidePwaBanner();
+      }
+      deferredInstallPrompt = null;
+    });
+  };
+
+  window.dismissPwaBanner = function() {
+    localStorage.setItem(BANNER_DISMISSED_KEY, '1');
+    hidePwaBanner();
+  };
+
+})();
+</script>
+
 </body>
 </html>
+
 

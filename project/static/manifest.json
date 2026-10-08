@@ -1,29 +1,44 @@
 {
   "name": "Smart Canteen",
   "short_name": "Canteen",
-  "description": "Smart Canteen Ordering & Token System – Fresh. Fast. Traditional. Authentic Tamil Nadu dishes with instant live tokens and zero queue waiting.",
+  "description": "Smart Canteen Ordering & Token System – Fresh. Fast. Traditional. Authentic Tamil Nadu dishes, instant live tokens, zero queue waiting.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "orientation": "portrait-primary",
   "theme_color": "#C8102E",
   "background_color": "#F8F7F5",
-  "lang": "en",
-  "scope": "/",
+  "lang": "en-IN",
+  "id": "/",
   "icons": [
     {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='36' fill='%23C8102E'/><text y='130' x='30' font-size='120'>🍽️</text></svg>",
+      "src": "/static/icon-192.png",
       "sizes": "192x192",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='96' fill='%23C8102E'/><text y='360' x='60' font-size='320'>🍽️</text></svg>",
+      "src": "/static/icon-512.png",
       "sizes": "512x512",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/static/icon-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ],
   "categories": ["food", "shopping", "productivity"],
-  "screenshots": [],
-  "prefer_related_applications": false
+  "prefer_related_applications": false,
+  "screenshots": [
+    {
+      "src": "/static/images/biriyani.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "form_factor": "narrow",
+      "label": "Smart Canteen Menu"
+    }
+  ]
 }

@@ -4004,10 +4004,176 @@ button, select, input {
 
 
 /* ============================================================
+   PWA INSTALL BANNER
+   Smart Canteen – Progressive Web App Install UI
+   ============================================================ */
+
+.pwa-install-banner {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 500;
+  background: #ffffff;
+  border-top: 2px solid var(--brand-red);
+  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.14);
+  padding: 12px 16px;
+  transform: translateY(100%);
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  will-change: transform;
+}
+
+.pwa-install-banner.pwa-banner-visible {
+  transform: translateY(0);
+}
+
+.pwa-banner-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+.pwa-banner-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+.pwa-banner-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  border: 2px solid var(--border-light);
+  flex-shrink: 0;
+  object-fit: cover;
+}
+
+.pwa-banner-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.pwa-banner-text strong {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pwa-banner-text span {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pwa-banner-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.pwa-btn-install {
+  background: linear-gradient(135deg, var(--brand-red), var(--brand-red-dark));
+  color: #ffffff;
+  border: none;
+  border-radius: var(--radius-pill);
+  padding: 10px 20px;
+  font-size: 0.88rem;
+  font-weight: 800;
+  cursor: pointer;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 4px 14px rgba(200, 16, 46, 0.35);
+  transition: all var(--trans-fast);
+  min-height: 40px;
+}
+
+.pwa-btn-install:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(200, 16, 46, 0.45);
+}
+
+.pwa-btn-dismiss {
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-light);
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all var(--trans-fast);
+  flex-shrink: 0;
+}
+
+.pwa-btn-dismiss:hover {
+  background: #fee2e2;
+  border-color: var(--brand-red);
+  color: var(--brand-red);
+}
+
+/* iOS Safari instruction hint */
+.pwa-ios-hint {
+  margin-top: 10px;
+  background: #FFF8E6;
+  border: 1px solid #FFE082;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 0.82rem;
+  color: #92400E;
+  line-height: 1.4;
+  text-align: center;
+}
+
+.pwa-ios-hint strong {
+  font-weight: 800;
+  color: #78350F;
+}
+
+@media (max-width: 480px) {
+  .pwa-install-banner {
+    padding: 10px 12px;
+  }
+
+  .pwa-banner-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+  }
+
+  .pwa-banner-text strong {
+    font-size: 0.88rem;
+  }
+
+  .pwa-btn-install {
+    padding: 9px 14px;
+    font-size: 0.82rem;
+  }
+}
+
+/* ============================================================
    MOBILE RESPONSIVE SYSTEM
    Smart Canteen – Full Mobile / Tablet Support
    320px | 375px | 390px | 430px | 768px | 1366px
    ============================================================ */
+
 
 /* ── Global Safe Overflow & Touch Targets ─────────────────── */
 html, body {
