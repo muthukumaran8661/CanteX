@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: cantex
+    runtime: python
+    buildCommand: pip install -r project/requirements.txt
+    startCommand: gunicorn --chdir project app:app --bind 0.0.0.0:$PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11"
+      - key: SECRET_KEY
+        generateValue: true
