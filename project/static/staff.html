@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart Canteen – Kitchen Command &amp; Station Queues</title>
+  <meta name="description" content="Staff Kitchen Dashboard: Manage parallel station queues (Main Dish, Snacks, Beverages), live token board, and real-time inventory." />
+  <link rel="stylesheet" href="/static/style.css" />
+  <style>
+    /* Staff Command Center Specific Styling */
+    .station-tab-bar {
+      display: flex;
+      gap: 10px;
+      margin: 20px 0 24px;
+      overflow-x: auto;
+      padding-bottom: 6px;
+    }
+    .station-tab-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #ffffff;
+      border: 1.5px solid #e2e8f0;
+      padding: 10px 18px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: #334155;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+    .station-tab-btn:hover {
+      border-color: #cbd5e1;
+      background: #f8fafc;
+    }
+    .station-tab-btn.active {
+      background: #C8102E;
+      color: #ffffff;
+      border-color: #C8102E;
+      box-shadow: 0 4px 14px rgba(200, 16, 46, 0.25);
+    }
+    .station-tab-btn .badge-count {
+      background: rgba(0,0,0,0.1);
+      padding: 2px 7px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+    }
+    .station-tab-btn.active .badge-count {
+      background: rgba(255,255,255,0.25);
+      color: #ffffff;
+    }
+    .live-board-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin-bottom: 30px;
+    }
+    .board-station-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 18px 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    .board-card-title {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 14px;
+      border-bottom: 1px solid #f1f5f9;
+      padding-bottom: 8px;
+    }
+    .board-metric {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .board-metric-label {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #64748b;
+      font-weight: 700;
+    }
+    .board-metric-val {
+      font-size: 1.25rem;
+      font-weight: 900;
+      color: #C8102E;
+    }
+    .board-ready-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 10px;
+    }
+    .ready-pill {
+      background: #ecfdf5;
+      color: #059669;
+      border: 1px solid #a7f3d0;
+      font-size: 0.8rem;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 6px;
+    }
+    .inventory-table-wrap {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      overflow: hidden;
+      margin-top: 16px;
+    }
+    .inventory-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.9rem;
+    }
+    .inventory-table th {
+      background: #f8fafc;
+      padding: 12px 16px;
+      font-weight: 700;
+      color: #475569;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .inventory-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid #f1f5f9;
+      color: #1e293b;
+    }
+    .stock-badge-low {
+      background: #fee2e2;
+      color: #dc2626;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 6px;
+    }
+    .stock-badge-ok {
+      background: #f0fdf4;
+      color: #16a34a;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 6px;
+    }
+    .btn-stock-reset {
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 0.78rem;
+      cursor: pointer;
+    }
+    .btn-stock-reset:hover {
+      background: #e2e8f0;
+    }
+    .sse-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      background: #ecfdf5;
+      color: #059669;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid #a7f3d0;
+    }
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #10b981;
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse {
+      0% { transform: scale(0.95); opacity: 0.8; }
+      50% { transform: scale(1.3); opacity: 1; }
+      100% { transform: scale(0.95); opacity: 0.8; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── NAVBAR ──────────────────────────────────────────────────── -->
+<nav class="navbar">
+  <a class="navbar-brand" href="/">
+    <div class="navbar-logo">🍱</div>
+    <div>
+      <div class="navbar-title">Smart Canteen</div>
+      <div class="navbar-subtitle">Kitchen Command Panel</div>
+    </div>
+  </a>
+  <nav class="navbar-nav">
+    <a class="nav-link" href="/">Customer App</a>
+    <a class="nav-link active" href="/staff">Station Queues</a>
+  </nav>
+</nav>
+
+<!-- ── STAFF HERO ───────────────────────────────────────────────── -->
+<div class="staff-hero">
+  <div class="staff-hero-left">
+    <h1>
+      👨‍🍳 Parallel Station Kitchen
+      <span class="live-badge"><span class="live-dot"></span> REAL-TIME</span>
+    </h1>
+    <p>Independent station queues (Main Dish, Snacks, Beverages) with dynamic ETA scheduling.</p>
+  </div>
+  <div style="display:flex;align-items:center;gap:16px;">
+    <div class="sse-indicator" id="sseBadge">
+      <span class="pulse-dot"></span> Live Stream Active
+    </div>
+  </div>
+</div>
+
+<!-- ── STATS TILES ──────────────────────────────────────────────── -->
+<div class="staff-stats">
+  <div class="stat-tile">
+    <div class="stat-tile-val c-yellow" id="statWaiting">0</div>
+    <div class="stat-tile-label">⏳ Waiting</div>
+  </div>
+  <div class="stat-tile">
+    <div class="stat-tile-val c-orange" id="statPreparing">0</div>
+    <div class="stat-tile-label">🍳 Preparing</div>
+  </div>
+  <div class="stat-tile">
+    <div class="stat-tile-val c-green" id="statReady">0</div>
+    <div class="stat-tile-label">✅ Ready for Pickup</div>
+  </div>
+  <div class="stat-tile">
+    <div class="stat-tile-val c-teal" id="statServed">0</div>
+    <div class="stat-tile-label">🎉 Served Total</div>
+  </div>
+</div>
+
+<div class="queue-section" style="max-width:1200px;margin:0 auto;padding:0 24px;">
+
+  <!-- ── 1. LIVE TOKEN BOARD PREVIEW ────────────────────────────── -->
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+    <h2 style="font-size:1.3rem;font-weight:800;color:#0f172a;margin:0;">
+      📡 Live Token Board
+    </h2>
+    <span style="font-size:0.85rem;color:#64748b;">Updates automatically across campus screens</span>
+  </div>
+
+  <div class="live-board-grid" id="liveBoardGrid">
+    <!-- Populated by JS -->
+  </div>
+
+  <!-- ── 2. PARALLEL STATION QUEUE CONTROLLER ───────────────────── -->
+  <div class="queue-section-header" style="margin-top:20px;">
+    <div>
+      <h2 style="font-size:1.3rem;font-weight:800;color:#0f172a;margin:0;">
+        🍳 Station-Wise Queues
+      </h2>
+      <p style="font-size:0.85rem;color:#64748b;margin:4px 0 0;">
+        Stations operate independently. Dynamic ETA re-sorting ensures priority by actual ready time.
+      </p>
+    </div>
+    <button class="btn-refresh" onclick="loadAllKitchenData()" aria-label="Refresh queues">
+      ⟳ Refresh
+    </button>
+  </div>
+
+  <!-- Station Tabs -->
+  <div class="station-tab-bar" id="stationTabBar">
+    <button class="station-tab-btn active" data-station="ALL" onclick="switchStationView('ALL')">
+      <span>🍽️</span> All Stations <span class="badge-count" id="badge-all">0</span>
+    </button>
+    <button class="station-tab-btn" data-station="MAIN_DISH" onclick="switchStationView('MAIN_DISH')">
+      <span>🍛</span> Main Dish <span class="badge-count" id="badge-MAIN_DISH">0</span>
+    </button>
+    <button class="station-tab-btn" data-station="SNACKS" onclick="switchStationView('SNACKS')">
+      <span>🍟</span> Snacks <span class="badge-count" id="badge-SNACKS">0</span>
+    </button>
+    <button class="station-tab-btn" data-station="BEVERAGES" onclick="switchStationView('BEVERAGES')">
+      <span>🥤</span> Beverages <span class="badge-count" id="badge-BEVERAGES">0</span>
+    </button>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-state" id="queueLoading">
+    <div class="loading-spinner"></div>
+    Synchronizing station queues…
+  </div>
+
+  <!-- Queue Cards Container -->
+  <div class="queue-list hidden" id="kitchenQueueList"></div>
+
+  <!-- Empty Queue State -->
+  <div class="empty-queue hidden" id="emptyKitchenQueue">
+    <div class="empty-queue-icon">🎉</div>
+    <h3>Station Queue is Clear!</h3>
+    <p>No pending preparation tasks in this station right now.</p>
+  </div>
+
+  <!-- ── 3. LIVE INVENTORY & RACE CONDITION CONTROLLER ─────────── -->
+  <div style="margin-top:48px;border-top:1px solid #e2e8f0;padding-top:28px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <div>
+        <h2 style="font-size:1.3rem;font-weight:800;color:#0f172a;margin:0;">
+          📦 Live Inventory &amp; Concurrency Controller
+        </h2>
+        <p style="font-size:0.85rem;color:#64748b;margin:4px 0 0;">
+          Real-time stock ledger. Test Round 2 concurrency guarantee by setting Burger stock to 1!
+        </p>
+      </div>
+      <button class="btn-stock-reset" onclick="resetDemoItemStock('Burger', 1)" style="padding:8px 14px;background:#fee2e2;color:#b91c1c;border-color:#fca5a5;">
+        ⚡ Set Burger Stock = 1 (Demo 1 Race Test)
+      </button>
+    </div>
+
+    <div class="inventory-table-wrap">
+      <table class="inventory-table">
+        <thead>
+          <tr>
+            <th>Dish Name</th>
+            <th>Station</th>
+            <th>Base Prep Time</th>
+            <th>Live Stock</th>
+            <th>Status</th>
+            <th>Quick Actions</th>
+          </tr>
+        </thead>
+        <tbody id="inventoryTableBody">
+          <!-- Populated by JS -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── TOAST CONTAINER ──────────────────────────────────────────── -->
+<div class="toast-wrap" id="toastWrap" aria-live="polite"></div>
+
+<script>
+  let activeStation = 'ALL';
+  let stationQueuesData = {};
+  let menuInventoryData = [];
+
+  // 1. Initialize Real-time SSE Connection
+  function initSSE() {
+    if (!window.EventSource) return;
+    const evtSource = new EventSource('/api/events');
+
+    evtSource.onmessage = function(e) {
+      loadAllKitchenData();
+    };
+
+    evtSource.addEventListener('order_created', () => {
+      showStaffToast('New order placed!', 'info');
+      loadAllKitchenData();
+    });
+
+    evtSource.addEventListener('order_cancelled', (e) => {
+      showStaffToast('Order cancelled by student. Inventory restored.', 'info');
+      loadAllKitchenData();
+    });
+
+    evtSource.addEventListener('order_edited', () => {
+      showStaffToast('Order edited (+5m prep penalty applied, queue re-sorted)', 'info');
+      loadAllKitchenData();
+    });
+
+    evtSource.addEventListener('task_advanced', () => {
+      loadAllKitchenData();
+    });
+
+    evtSource.addEventListener('stock_updated', () => {
+      loadInventory();
+    });
+
+    evtSource.onerror = function() {
+      // Reconnects automatically
+    };
+  }
+
+  // 2. Load all Kitchen Data
+  async function loadAllKitchenData() {
+    await Promise.all([
+      loadStationQueues(),
+      loadLiveBoard(),
+      loadInventory(),
+      loadStatsCounters()
+    ]);
+  }
+
+  // 3. Load Station Queues
+  async function loadStationQueues() {
+    try {
+      const res = await fetch('/api/stations/queue');
+      stationQueuesData = await res.json();
+      renderStationQueues();
+      updateTabBadges();
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  // 4. Update Tab Badges
+  function updateTabBadges() {
+    let totalAll = 0;
+    ['MAIN_DISH', 'SNACKS', 'BEVERAGES'].forEach(st => {
+      const count = (stationQueuesData[st] || []).length;
+      totalAll += count;
+      const el = document.getElementById(`badge-${st}`);
+      if (el) el.textContent = count;
+    });
+    const allEl = document.getElementById('badge-all');
+    if (allEl) allEl.textContent = totalAll;
+  }
+
+  // 5. Render Station Queues
+  function renderStationQueues() {
+    const listEl = document.getElementById('kitchenQueueList');
+    const loadingEl = document.getElementById('queueLoading');
+    const emptyEl = document.getElementById('emptyKitchenQueue');
+
+    if (loadingEl) loadingEl.classList.add('hidden');
+    if (!listEl) return;
+
+    let tasksToShow = [];
+    if (activeStation === 'ALL') {
+      ['MAIN_DISH', 'SNACKS', 'BEVERAGES'].forEach(st => {
+        tasksToShow.push(...(stationQueuesData[st] || []));
+      });
+      // Sort unified list by estimated ready time
+      tasksToShow.sort((a,b) => new Date(a.estimated_ready_time) - new Date(b.estimated_ready_time));
+    } else {
+      tasksToShow = stationQueuesData[activeStation] || [];
+    }
+
+    if (tasksToShow.length === 0) {
+      listEl.classList.add('hidden');
+      if (emptyEl) emptyEl.classList.remove('hidden');
+      return;
+    }
+
+    listEl.classList.remove('hidden');
+    if (emptyEl) emptyEl.classList.add('hidden');
+    listEl.innerHTML = '';
+
+    tasksToShow.forEach((task, idx) => {
+      const card = document.createElement('div');
+      card.className = 'queue-card';
+
+      const etaTime = task.estimated_ready_time
+        ? new Date(task.estimated_ready_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        : 'ASAP';
+
+      const isPreparing = task.status === 'Preparing';
+      const isReady = task.status === 'Ready';
+
+      let nextBtnHtml = '';
+      if (task.status === 'Waiting') {
+        nextBtnHtml = `<button class="btn-adv btn-adv-start" onclick="advanceTask(${task.id})">🍳 Start Cooking</button>`;
+      } else if (task.status === 'Preparing') {
+        nextBtnHtml = `<button class="btn-adv btn-adv-ready" onclick="advanceTask(${task.id})">✅ Mark Ready</button>`;
+      } else if (task.status === 'Ready') {
+        nextBtnHtml = `<button class="btn-adv btn-adv-serve" onclick="advanceTask(${task.id})">🎉 Serve &amp; Complete</button>`;
+      }
+
+      card.innerHTML = `
+        <div class="queue-card-inner">
+          <div class="queue-strip strip-${task.status}"></div>
+          <div class="queue-card-content">
+            <div class="queue-pos-num">#${task.station_position || (idx + 1)}</div>
+            <div class="queue-info">
+              <div class="queue-token-lbl">
+                ${task.token}
+                <span style="font-size:0.75rem;font-weight:700;color:#64748b;margin-left:8px;padding:2px 8px;background:#f1f5f9;border-radius:4px;">
+                  ${task.station_code}
+                </span>
+              </div>
+              <div class="queue-items-txt" style="font-size:1.05rem;font-weight:700;color:#0f172a;margin:4px 0;">
+                ${task.items_summary}
+              </div>
+              <div class="queue-meta-txt">
+                Estimated Ready: <strong style="color:#C8102E;">${etaTime}</strong> • Student: ${task.student_name || 'Campus Student'}
+              </div>
+            </div>
+            <div class="queue-right">
+              <span class="status-chip chip-${task.status}">
+                ${task.status}
+              </span>
+              <div class="queue-btn-group" style="margin-top:10px;">
+                ${nextBtnHtml}
+                <button class="btn-cancel-ord" onclick="cancelOrderFromStaff('${task.token}')">
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+      listEl.appendChild(card);
+    });
+  }
+
+  // 6. Switch Station Tab
+  function switchStationView(stationCode) {
+    activeStation = stationCode;
+    document.querySelectorAll('.station-tab-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.station === stationCode);
+    });
+    renderStationQueues();
+  }
+
+  // 7. Advance Task
+  async function advanceTask(taskId) {
+    try {
+      const res = await fetch(`/api/station-task/${taskId}/advance`, { method: 'POST' });
+      const data = await res.json();
+      if (data.success) {
+        showStaffToast(data.message, 'success');
+        loadAllKitchenData();
+      } else {
+        showStaffToast(data.message, 'error');
+      }
+    } catch (err) {
+      showStaffToast('Connection error', 'error');
+    }
+  }
+
+  // 8. Cancel Order from Staff
+  async function cancelOrderFromStaff(token) {
+    if (!confirm(`Cancel order ${token}? This restores stock and issues a refund.`)) return;
+    try {
+      const res = await fetch(`/api/order/${token}/cancel`, { method: 'POST' });
+      const data = await res.json();
+      if (data.success) {
+        showStaffToast(`Order ${token} cancelled. Refund issued.`, 'info');
+        loadAllKitchenData();
+      } else {
+        showStaffToast(data.message, 'error');
+      }
+    } catch (err) {
+      showStaffToast('Error cancelling order', 'error');
+    }
+  }
+
+  // 9. Load Live Board
+  async function loadLiveBoard() {
+    try {
+      const res = await fetch('/api/live-board');
+      const board = await res.json();
+      const grid = document.getElementById('liveBoardGrid');
+      if (!grid) return;
+      grid.innerHTML = '';
+
+      const stationDisplay = {
+        'MAIN_DISH': { name: 'Main Dish', icon: '🍛' },
+        'SNACKS':    { name: 'Snacks', icon: '🍟' },
+        'BEVERAGES': { name: 'Beverages', icon: '🥤' }
+      };
+
+      for (const [st, info] of Object.entries(board)) {
+        const conf = stationDisplay[st] || { name: st, icon: '🍽️' };
+        const readyPills = (info.ready_tokens || []).map(t => `<span class="ready-pill">✅ ${t}</span>`).join('') || '<span style="color:#94a3b8;font-size:0.8rem;">None ready yet</span>';
+
+        const card = document.createElement('div');
+        card.className = 'board-station-card';
+        card.innerHTML = `
+          <div class="board-card-title">${conf.icon} ${conf.name} Station</div>
+          <div class="board-metric">
+            <span class="board-metric-label">🍳 Now Preparing:</span>
+            <span class="board-metric-val">${info.now_preparing}</span>
+          </div>
+          <div class="board-metric">
+            <span class="board-metric-label">⏱️ Next in Line:</span>
+            <span style="font-weight:700;color:#475569;">${info.next}</span>
+          </div>
+          <div style="margin-top:12px;">
+            <div class="board-metric-label">Ready for Pickup:</div>
+            <div class="board-ready-pills">${readyPills}</div>
+          </div>
+        `;
+        grid.appendChild(card);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  // 10. Load Live Inventory
+  async function loadInventory() {
+    try {
+      const res = await fetch('/api/inventory');
+      menuInventoryData = await res.json();
+      const tbody = document.getElementById('inventoryTableBody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      menuInventoryData.forEach(item => {
+        const tr = document.createElement('tr');
+        const isLow = item.stock <= 3;
+        tr.innerHTML = `
+          <td><strong>${item.name}</strong></td>
+          <td><span style="font-size:0.8rem;background:#f1f5f9;padding:2px 8px;border-radius:4px;font-weight:700;">${item.station_code}</span></td>
+          <td>${item.prep_time_minutes} mins</td>
+          <td><span class="${isLow ? 'stock-badge-low' : 'stock-badge-ok'}">${item.stock} left</span></td>
+          <td>${item.stock > 0 ? '🟢 In Stock' : '🔴 Sold Out'}</td>
+          <td>
+            <button class="btn-stock-reset" onclick="promptSetStock(${item.id}, '${item.name}', ${item.stock})">
+              Adjust Stock
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  // 11. Adjust Stock Dialog
+  async function promptSetStock(id, name, currentStock) {
+    const val = prompt(`Enter new stock count for ${name}:`, currentStock);
+    if (val === null) return;
+    const num = parseInt(val, 10);
+    if (isNaN(num) || num < 0) return alert('Please enter a valid non-negative number.');
+
+    try {
+      const res = await fetch(`/api/inventory/${id}/reset`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ stock: num })
+      });
+      const data = await res.json();
+      if (data.success) {
+        showStaffToast(`Stock for ${name} updated to ${num}`, 'success');
+        loadInventory();
+      }
+    } catch (e) {
+      alert('Error updating stock');
+    }
+  }
+
+  // 12. Reset Demo Item Stock
+  async function resetDemoItemStock(name, stock) {
+    const match = menuInventoryData.find(i => i.name.toLowerCase() === name.toLowerCase());
+    if (!match) return alert(`Item ${name} not found in catalog.`);
+    await fetch(`/api/inventory/${match.id}/reset`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ stock: stock })
+    });
+    showStaffToast(`⚡ ${name} stock set to ${stock}! Ready for Demo 1 race test.`, 'info');
+    loadInventory();
+  }
+
+  // 13. Load Stats Counters
+  async function loadStatsCounters() {
+    try {
+      const [qRes, ordRes] = await Promise.all([
+        fetch('/api/queue'),
+        fetch('/api/orders')
+      ]);
+      const qData = await qRes.json();
+      const ordData = await ordRes.json();
+
+      let waiting = 0, preparing = 0, ready = 0, served = 0;
+      (qData.queue || []).forEach(t => {
+        if (t.status === 'Waiting') waiting++;
+        if (t.status === 'Preparing') preparing++;
+        if (t.status === 'Ready') ready++;
+      });
+      served = (ordData || []).filter(o => o.status === 'Completed' || o.status === 'Served').length;
+
+      if (document.getElementById('statWaiting')) document.getElementById('statWaiting').textContent = waiting;
+      if (document.getElementById('statPreparing')) document.getElementById('statPreparing').textContent = preparing;
+      if (document.getElementById('statReady')) document.getElementById('statReady').textContent = ready;
+      if (document.getElementById('statServed')) document.getElementById('statServed').textContent = served;
+    } catch (e) {}
+  }
+
+  function showStaffToast(msg, type = 'info') {
+    const container = document.getElementById('toastWrap');
+    if (!container) return;
+    const toast = document.createElement('div');
+    toast.className = `toast-msg ${type}`;
+    toast.innerHTML = `<span>${type === 'success' ? '✓' : type === 'error' ? '✕' : 'ℹ'}</span> <span>${msg}</span>`;
+    container.appendChild(toast);
+    setTimeout(() => toast.remove(), 3200);
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    loadAllKitchenData();
+    initSSE();
+  });
+</script>
+</body>
+</html>

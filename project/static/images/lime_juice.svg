@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <!-- Background -->
+  <circle cx="100" cy="100" r="95" fill="#F1F8E9"/>
+  <!-- Glass shadow -->
+  <ellipse cx="100" cy="175" rx="30" ry="7" fill="#B0BEC5" opacity="0.5"/>
+  <!-- Glass body -->
+  <path d="M72 78 L76 170 L124 170 L128 78 Z" fill="#E8F5E9" opacity="0.5"/>
+  <!-- Lime juice liquid -->
+  <path d="M74 92 L78 168 L122 168 L126 92 Z" fill="#AED581"/>
+  <path d="M74 92 L126 92 Q124 90 76 90 Z" fill="#C5E1A5"/>
+  <!-- Lighter at top (ice area) -->
+  <path d="M74 92 L77 115 L123 115 L126 92 Z" fill="#DCEDC8"/>
+  <!-- Ice cubes -->
+  <rect x="80" y="105" width="16" height="16" rx="3" fill="#E8F5E9" opacity="0.9"/>
+  <rect x="98" y="108" width="18" height="15" rx="3" fill="#F1F8E9" opacity="0.85"/>
+  <!-- Ice shine -->
+  <line x1="82" y1="108" x2="88" y2="108" stroke="white" stroke-width="1.2" opacity="0.9"/>
+  <line x1="100" y1="111" x2="106" y2="111" stroke="white" stroke-width="1.2" opacity="0.9"/>
+  <!-- Bubbles in soda -->
+  <circle cx="82" cy="130" r="3" fill="white" opacity="0.5"/>
+  <circle cx="95" cy="140" r="2.5" fill="white" opacity="0.45"/>
+  <circle cx="110" cy="128" r="2" fill="white" opacity="0.5"/>
+  <circle cx="88" cy="148" r="2" fill="white" opacity="0.4"/>
+  <circle cx="115" cy="145" r="3" fill="white" opacity="0.45"/>
+  <circle cx="103" cy="155" r="2.5" fill="white" opacity="0.4"/>
+  <!-- Glass outline -->
+  <path d="M72 78 L76 170 L124 170 L128 78" stroke="#8BC34A" stroke-width="2" fill="none" stroke-linejoin="round"/>
+  <!-- Lime slice on rim -->
+  <circle cx="128" cy="88" r="18" fill="#8BC34A"/>
+  <circle cx="128" cy="88" r="16" fill="#AED581"/>
+  <!-- Lime wedge shape (half circle) -->
+  <path d="M128 72 A16 16 0 0 1 144 88 L128 88 Z" fill="#CDDC39"/>
+  <path d="M128 72 A16 16 0 0 1 144 88 L128 88 Z" fill="#D4E157" opacity="0.7"/>
+  <!-- Lime segments -->
+  <line x1="128" y1="72" x2="128" y2="104" stroke="#8BC34A" stroke-width="1.2"/>
+  <line x1="128" y1="72" x2="144" y2="88" stroke="#8BC34A" stroke-width="1.2"/>
+  <line x1="128" y1="88" x2="136" y2="80" stroke="#8BC34A" stroke-width="1"/>
+  <line x1="128" y1="88" x2="138" y2="95" stroke="#8BC34A" stroke-width="1"/>
+  <!-- Lime rind -->
+  <circle cx="128" cy="88" r="16" fill="none" stroke="#558B2F" stroke-width="2.5"/>
+  <!-- Mint leaves garnish -->
+  <ellipse cx="85" cy="88" rx="8" ry="4" fill="#4CAF50" transform="rotate(-30,85,88)"/>
+  <ellipse cx="90" cy="84" rx="7" ry="3.5" fill="#66BB6A" transform="rotate(-10,90,84)"/>
+  <ellipse cx="82" cy="84" rx="6" ry="3" fill="#388E3C" transform="rotate(-50,82,84)"/>
+  <!-- Straw (green) -->
+  <rect x="108" y="55" width="6" height="110" rx="3" fill="#4CAF50"/>
+  <rect x="109" y="56" width="4" height="108" rx="2" fill="#81C784"/>
+  <text x="100" y="192" text-anchor="middle" font-family="sans-serif" font-size="11" font-weight="bold" fill="#33691E">Fresh Lime Juice</text>
+</svg>

@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <!-- Background -->
+  <circle cx="100" cy="100" r="95" fill="#FFF8E1"/>
+  <!-- Saucer -->
+  <ellipse cx="100" cy="168" rx="55" ry="12" fill="#BDBDBD"/>
+  <ellipse cx="100" cy="166" rx="55" ry="12" fill="#E0E0E0"/>
+  <ellipse cx="100" cy="164" rx="52" ry="10" fill="#F5F5F5"/>
+  <!-- Cup body -->
+  <path d="M65 130 Q62 168 100 168 Q138 168 135 130 Z" fill="#8D6E63"/>
+  <path d="M67 130 Q64 166 100 166 Q136 166 133 130 Z" fill="#A1887F"/>
+  <path d="M68 130 Q65 164 100 164 Q135 164 132 130 Z" fill="#BCAAA4"/>
+  <!-- Cup rim -->
+  <ellipse cx="100" cy="130" rx="34" ry="10" fill="#6D4C41"/>
+  <ellipse cx="100" cy="128" rx="34" ry="10" fill="#795548"/>
+  <!-- Tea liquid - amber -->
+  <ellipse cx="100" cy="128" rx="30" ry="8" fill="#795548"/>
+  <ellipse cx="100" cy="126" rx="30" ry="8" fill="#8D4E20"/>
+  <ellipse cx="100" cy="124" rx="28" ry="7" fill="#A0522D"/>
+  <ellipse cx="100" cy="122" rx="26" ry="6" fill="#B5651D"/>
+  <!-- Tea surface gradient -->
+  <ellipse cx="100" cy="120" rx="24" ry="5" fill="#D4870D"/>
+  <!-- Milk swirl on top -->
+  <path d="M92 119 Q100 115 108 119 Q105 122 100 122 Q95 122 92 119Z" fill="#FFFDE7" opacity="0.8"/>
+  <!-- Handle -->
+  <path d="M134 136 Q148 136 148 148 Q148 160 134 158" stroke="#795548" stroke-width="6" fill="none" stroke-linecap="round"/>
+  <path d="M134 136 Q146 136 146 148 Q146 158 134 158" stroke="#A1887F" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <!-- Steam wisps -->
+  <path d="M88 108 Q90 97 87 86" stroke="#CFD8DC" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <path d="M100 105 Q102 94 100 83" stroke="#CFD8DC" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <path d="M112 108 Q114 97 112 86" stroke="#CFD8DC" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <!-- Biscuit on saucer -->
+  <rect x="130" y="158" width="22" height="8" rx="2" fill="#F5CBA7"/>
+  <rect x="131" y="159" width="20" height="6" rx="1" fill="#FAD7A0"/>
+  <circle cx="141" cy="162" r="1.2" fill="#E59866"/>
+  <text x="100" y="188" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="bold" fill="#5D4037">Tea</text>
+</svg>

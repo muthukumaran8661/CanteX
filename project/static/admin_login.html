@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Login – SMART CANTEEN</title>
+  <meta name="description" content="Dedicated Administrator portal login for Smart Canteen system." />
+  <link rel="stylesheet" href="/static/style.css" />
+  <style>
+    :root {
+      --admin-red: #b91c1c;
+      --admin-deep-red: #881337;
+      --admin-orange: #ea580c;
+      --admin-dark: #0f172a;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: linear-gradient(135deg, #fff5f5 0%, #fef2f2 50%, #fff7ed 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #1e293b;
+    }
+
+    .admin-login-wrapper {
+      width: 100%;
+      max-width: 440px;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    .admin-card {
+      background: #ffffff;
+      border-radius: 20px;
+      box-shadow: 0 20px 40px -15px rgba(185, 28, 28, 0.15), 0 0 1px 1px rgba(0,0,0,0.06);
+      padding: 40px 36px;
+      position: relative;
+      overflow: hidden;
+      border-top: 5px solid var(--admin-red);
+    }
+
+    .admin-card::before {
+      content: "";
+      position: absolute;
+      top: -50px;
+      right: -50px;
+      width: 130px;
+      height: 130px;
+      background: radial-gradient(circle, rgba(234, 88, 12, 0.15) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+
+    .admin-header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .admin-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #fee2e2;
+      color: var(--admin-red);
+      font-size: 0.78rem;
+      font-weight: 800;
+      padding: 4px 12px;
+      border-radius: 999px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .admin-title {
+      font-size: 1.6rem;
+      font-weight: 900;
+      color: #0f172a;
+      margin: 0 0 6px 0;
+      letter-spacing: -0.5px;
+    }
+
+    .admin-subtitle {
+      font-size: 0.88rem;
+      color: #64748b;
+      margin: 0;
+    }
+
+    .admin-error-box {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #991b1b;
+      border-radius: 10px;
+      padding: 12px 14px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      display: none;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+      animation: shake 0.3s ease-in-out;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-6px); }
+      75% { transform: translateX(6px); }
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #334155;
+      margin-bottom: 8px;
+    }
+
+    .input-wrapper {
+      position: relative;
+    }
+
+    .input-wrapper input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 13px 16px;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      color: #0f172a;
+      background: #f8fafc;
+      transition: all 0.2s;
+    }
+
+    .input-wrapper input:focus {
+      outline: none;
+      border-color: var(--admin-red);
+      background: #ffffff;
+      box-shadow: 0 0 0 3px rgba(185, 28, 28, 0.12);
+    }
+
+    .form-extra {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: -10px;
+      margin-bottom: 22px;
+    }
+
+    .forgot-link {
+      font-size: 0.83rem;
+      color: #b91c1c;
+      text-decoration: none;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .forgot-link:hover {
+      text-decoration: underline;
+    }
+
+    .btn-admin-submit {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%);
+      color: #ffffff;
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 8px 18px -4px rgba(185, 28, 28, 0.35);
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-admin-submit:hover {
+      background: linear-gradient(135deg, #991b1b 0%, #7f1d1d 100%);
+      transform: translateY(-1px);
+      box-shadow: 0 10px 22px -4px rgba(185, 28, 28, 0.45);
+    }
+
+    .btn-admin-submit:active {
+      transform: translateY(0);
+    }
+
+    .demo-helper {
+      margin-top: 26px;
+      padding-top: 20px;
+      border-top: 1px dashed #e2e8f0;
+      text-align: center;
+    }
+
+    .demo-btn {
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #475569;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .demo-btn:hover {
+      background: #e2e8f0;
+      color: #1e293b;
+    }
+
+    .back-home-wrap {
+      text-align: center;
+      margin-top: 22px;
+    }
+
+    .back-home-link {
+      color: #64748b;
+      font-size: 0.88rem;
+      text-decoration: none;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: color 0.2s;
+    }
+
+    .back-home-link:hover {
+      color: var(--admin-red);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="admin-login-wrapper">
+    <div class="admin-card">
+      <div class="admin-header">
+        <div class="admin-badge">
+          <span>🛡️</span> Canteen Administration
+        </div>
+        <h1 class="admin-title">ADMIN LOGIN</h1>
+        <p class="admin-subtitle">Secure management &amp; live kitchen operations</p>
+      </div>
+
+      <!-- Generic Error Box -->
+      <div class="admin-error-box" id="adminErrorBox">
+        <span>⚠️</span>
+        <span id="adminErrorText">Invalid admin credentials.</span>
+      </div>
+
+      <form id="adminLoginForm" onsubmit="handleAdminLogin(event)">
+        <div class="form-group">
+          <label for="adminEmail">Admin Email</label>
+          <div class="input-wrapper">
+            <input
+              type="email"
+              id="adminEmail"
+              required
+              autocomplete="email"
+              placeholder="admin@smartcanteen.com"
+            />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="adminPassword">Admin Password</label>
+          <div class="input-wrapper">
+            <input
+              type="password"
+              id="adminPassword"
+              required
+              autocomplete="current-password"
+              placeholder="••••••••••••"
+            />
+          </div>
+        </div>
+
+        <div class="form-extra">
+          <a class="forgot-link" onclick="handleForgotPassword()">Forgot Password</a>
+        </div>
+
+        <button type="submit" class="btn-admin-submit" id="adminSubmitBtn">
+          <span>Login</span> →
+        </button>
+      </form>
+
+      <!-- Demo Credentials Helper -->
+      <div class="demo-helper">
+        <button type="button" class="demo-btn" onclick="fillAdminDemo()">
+          ⚡ Auto-fill Registered Admin Demo
+        </button>
+      </div>
+    </div>
+
+    <div class="back-home-wrap">
+      <a href="/" class="back-home-link">
+        <span>←</span> Return to Public Canteen
+      </a>
+    </div>
+  </div>
+
+  <script>
+    function fillAdminDemo() {
+      document.getElementById('adminEmail').value = 'admin@smartcanteen.com';
+      document.getElementById('adminPassword').value = 'Admin@123';
+      hideError();
+    }
+
+    function showError(msg) {
+      const box = document.getElementById('adminErrorBox');
+      const text = document.getElementById('adminErrorText');
+      text.textContent = msg || 'Invalid admin credentials.';
+      box.style.display = 'flex';
+    }
+
+    function hideError() {
+      const box = document.getElementById('adminErrorBox');
+      box.style.display = 'none';
+    }
+
+    function handleForgotPassword() {
+      alert("Forgot Password:\nPlease contact Campus IT / Canteen Administrator Support at: admin@smartcanteen.com or call Counter #2 Extension 401.");
+    }
+
+    async function handleAdminLogin(e) {
+      e.preventDefault();
+      hideError();
+
+      const email = document.getElementById('adminEmail').value.trim();
+      const password = document.getElementById('adminPassword').value;
+      const btn = document.getElementById('adminSubmitBtn');
+
+      btn.disabled = true;
+      btn.innerHTML = '<span>Verifying...</span>';
+
+      try {
+        const resp = await fetch('/api/auth/admin-login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+
+        const data = await resp.json();
+
+        if (resp.ok && data.success) {
+          window.location.href = data.redirect || '/admin';
+        } else {
+          // Requirement 4: Show generic "Invalid admin credentials."
+          showError(data.message || 'Invalid admin credentials.');
+          btn.disabled = false;
+          btn.innerHTML = '<span>Login</span> →';
+        }
+      } catch (err) {
+        showError('Network error. Please try again.');
+        btn.disabled = false;
+        btn.innerHTML = '<span>Login</span> →';
+      }
+    }
+  </script>
+</body>
+</html>

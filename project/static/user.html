@@ -1,0 +1,1165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SMART CANTEEN – Fresh. Fast. Traditional.</title>
+  <meta name="description" content="Premium fast-food restaurant ordering web application for Smart Canteen. Authentic Tamil Nadu dishes, instant live tokens, and zero queue waiting." />
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════════════
+     TOP NAVBAR (STICKY)
+══════════════════════════════════════════════════════════════ -->
+<header class="top-header" id="topHeader">
+  <div class="header-container">
+
+    <!-- Logo / Brand -->
+    <a class="brand-link" href="#home" onclick="navTo('home'); return false;">
+      <div class="brand-icon-box">🍽️</div>
+      <div class="brand-text-wrap">
+        <span class="brand-title">SMART CANTEEN</span>
+        <span class="brand-subtitle">Fresh • Fast • Traditional</span>
+      </div>
+    </a>
+
+    <!-- Swiggy-style Location & Counter Pill -->
+    <div class="swiggy-location-pill" id="swiggyLocationPill" title="Pickup Counter Location" onclick="navTo('menu')">
+      <span class="loc-pin">📍</span>
+      <div class="loc-details">
+        <span class="loc-title">Main Campus Canteen</span>
+        <span class="loc-subtitle">Counter #2, Food Court <span class="loc-arrow">▾</span></span>
+      </div>
+    </div>
+
+    <!-- Desktop Navigation Links -->
+    <nav class="desktop-nav" aria-label="Main Navigation">
+      <a class="nav-item active" id="nav-home" href="#home" onclick="navTo('home'); return false;">Home</a>
+      <a class="nav-item" id="nav-menu" href="#menu" onclick="navTo('menu'); return false;">Menu</a>
+      <a class="nav-item" id="nav-offers" href="#offers" onclick="navTo('offers'); return false;">
+        Offers <span class="nav-new-badge">NEW</span>
+      </a>
+      <a class="nav-item" id="nav-track" href="#track" onclick="navTo('track'); return false;">Track Order</a>
+      <a class="nav-item" id="nav-orders" href="#orders" onclick="navTo('orders'); return false;">My Orders</a>
+    </nav>
+
+    <!-- Header Actions (Right) -->
+    <div class="header-actions">
+      <!-- Search Trigger Button -->
+      <button class="icon-btn search-trigger" onclick="focusSearch()" aria-label="Search menu" title="Search food">
+        <span>🔍</span>
+      </button>
+
+      <!-- Authentication Actions (Sign In & Admin Login placed next to each other) -->
+      <div class="header-auth-actions" id="headerAuthActions">
+        <!-- Guest View: Sign In & Admin Login -->
+        <button class="header-auth-btn signin-btn" id="headerSignInBtn" onclick="openAuthModal('login')" title="Customer / Staff Sign In">
+          <span>🔐</span> Sign In
+        </button>
+
+        <a class="header-auth-btn admin-btn" id="headerAdminBtn" href="/admin/login" title="Admin Portal">
+          <span>🛡️</span> Admin Login
+        </a>
+
+        <!-- Authenticated User Dropdown (Populated dynamically) -->
+        <div class="user-profile-menu" id="userProfileMenu" style="display:none;">
+          <button class="user-profile-btn" id="userProfileBtn" onclick="toggleUserDropdown()" aria-haspopup="true">
+            <span class="user-avatar-icon" id="userAvatarIcon">👤</span>
+            <span class="user-profile-name" id="userProfileName">Student</span>
+            <span class="user-profile-caret">▼</span>
+          </button>
+          <div class="user-dropdown-panel" id="userDropdownPanel">
+            <div class="dropdown-user-meta">
+              <strong id="dropdownMetaName">Student</strong>
+              <small id="dropdownMetaEmail">student@smartcanteen.com</small>
+              <span class="dropdown-role-tag" id="dropdownMetaRole">CUSTOMER</span>
+            </div>
+            <div class="dropdown-divider"></div>
+            <a href="#orders" onclick="navTo('orders'); closeUserDropdown(); return false;" class="user-dropdown-link">📋 My Orders</a>
+            <a href="#track" onclick="navTo('track'); closeUserDropdown(); return false;" class="user-dropdown-link">⏱️ Track Order</a>
+            <div id="staffLinkContainer" style="display:none;">
+              <a href="/staff" class="user-dropdown-link" style="color:var(--brand-orange);font-weight:700;">👨‍🍳 Staff Operations</a>
+            </div>
+            <div id="adminLinkContainer" style="display:none;">
+              <a href="/admin" class="user-dropdown-link" style="color:var(--brand-deep-red);font-weight:700;">🛡️ Admin Dashboard</a>
+            </div>
+            <div class="dropdown-divider"></div>
+            <button onclick="logoutUser()" class="user-dropdown-link logout-item">🚪 Sign Out</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cart Button -->
+      <button class="nav-cart-btn" onclick="navTo('cart')" aria-label="View Tray / Cart" id="navCartBtn">
+        <span class="cart-btn-icon">🛒</span>
+        <span class="cart-btn-txt">Cart</span>
+        <span class="cart-btn-badge" id="navCartBadge">0</span>
+      </button>
+
+      <!-- Mobile Hamburger Toggle -->
+      <button class="hamburger-btn" id="hamburgerBtn" onclick="toggleMobileDrawer()" aria-label="Open mobile menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+
+  </div>
+</header>
+
+<!-- Mobile Navigation Drawer -->
+<div class="mobile-drawer-overlay" id="drawerOverlay" onclick="toggleMobileDrawer()"></div>
+<div class="mobile-drawer" id="mobileDrawer">
+  <div class="drawer-header">
+    <div class="brand-title" style="font-size:1.2rem;">🍽️ SMART CANTEEN</div>
+    <button class="drawer-close-btn" onclick="toggleMobileDrawer()">✕</button>
+  </div>
+  <div class="drawer-nav">
+    <a href="#home" onclick="navTo('home'); toggleMobileDrawer(); return false;">🏠 Home</a>
+    <a href="#menu" onclick="navTo('menu'); toggleMobileDrawer(); return false;">🍽️ Menu</a>
+    <a href="#offers" onclick="navTo('offers'); toggleMobileDrawer(); return false;">🔥 Today's Offers <span class="nav-new-badge">NEW</span></a>
+    <a href="#track" onclick="navTo('track'); toggleMobileDrawer(); return false;">⏱️ Track Order</a>
+    <a href="#orders" onclick="navTo('orders'); toggleMobileDrawer(); return false;">📋 My Orders</a>
+    <div style="height:1px;background:#e2e8f0;margin:8px 0;"></div>
+    <div id="drawerGuestAuth">
+      <a href="javascript:void(0)" onclick="openAuthModal('login'); toggleMobileDrawer();" style="color:var(--brand-red); font-weight:800;">🔐 Sign In</a>
+      <a href="/admin/login" style="color:var(--brand-deep-red); font-weight:800;">🛡️ Admin Login</a>
+    </div>
+    <div id="drawerUserAuth" style="display:none;">
+      <div style="padding:10px 14px;background:#f8fafc;border-radius:8px;margin-bottom:8px;">
+        <strong id="drawerUserName" style="display:block;color:#0f172a;">Student</strong>
+        <small id="drawerUserEmail" style="color:#64748b;">student@smartcanteen.com</small>
+      </div>
+      <div id="drawerStaffLink" style="display:none;">
+        <a href="/staff" style="color:var(--brand-orange); font-weight:800;">👨‍🍳 Staff Panel →</a>
+      </div>
+      <div id="drawerAdminLink" style="display:none;">
+        <a href="/admin" style="color:var(--brand-deep-red); font-weight:800;">🛡️ Admin Dashboard →</a>
+      </div>
+      <a href="javascript:void(0)" onclick="logoutUser(); toggleMobileDrawer();" style="color:#ef4444; font-weight:700;">🚪 Sign Out</a>
+    </div>
+  </div>
+  <div class="drawer-footer">
+    <p>Fresh. Fast. Traditional.</p>
+    <small>Campus Food Counter #2</small>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     MAIN VIEW CONTAINER (SPA)
+══════════════════════════════════════════════════════════════ -->
+<main class="app-main" id="appMain">
+
+  <!-- ── 1. HOME VIEW ─────────────────────────────────────────── -->
+  <section class="app-view active-view" id="view-home">
+
+    <!-- Swiggy-Style Vibrant Orange Hero Banner -->
+    <div class="swiggy-hero-container">
+      <div class="swiggy-hero-top-strip">
+        <span class="hero-chip">⚡ FAST TOKEN ORDERING</span>
+        <span class="hero-chip-sub">Skip the queue • Pick up hot at Counter #2</span>
+      </div>
+
+      <h1 class="swiggy-hero-heading">
+        Order food &amp; tiffin.<br />
+        <span class="swiggy-hero-highlight">Smart Canteen it!</span>
+      </h1>
+      <p class="swiggy-hero-subheading">
+        Authentic Tamil Nadu delicacies, hot filter coffee, and instant zero-wait pickup tokens.
+      </p>
+
+      <!-- Swiggy Dual Search & Counter Box -->
+      <div class="swiggy-hero-search-box">
+        <div class="hero-counter-selector" onclick="navTo('menu')">
+          <span class="counter-icon">📍</span>
+          <div class="counter-text-group">
+            <span class="counter-label">Pickup Location</span>
+            <span class="counter-val">Counter #2, Main Canteen ▾</span>
+          </div>
+        </div>
+        <div class="hero-search-divider"></div>
+        <div class="hero-search-input-wrap" onclick="focusSearch()">
+          <span class="search-lens-icon">🔍</span>
+          <input
+            type="text"
+            class="hero-search-input"
+            placeholder="Search for crispy dosa, meals, biriyani or coffee..."
+            readonly
+          />
+          <button class="hero-search-submit-btn" onclick="focusSearch()">Search</button>
+        </div>
+      </div>
+
+      <!-- Quick Canteen Perks Strip -->
+      <div class="swiggy-perks-row">
+        <div class="swiggy-perk-badge"><span>⚡</span> 5-Min Token Pickup</div>
+        <div class="swiggy-perk-badge"><span>📱</span> 100% Cashless UPI</div>
+        <div class="swiggy-perk-badge"><span>🍛</span> Pure Ghee &amp; Authentic Spices</div>
+        <div class="swiggy-perk-badge"><span>🏷️</span> Student Combos from ₹50</div>
+      </div>
+    </div>
+
+    <!-- Live Station Token Board Widget -->
+    <div class="section-container" style="padding-top:0;">
+      <div class="student-live-board">
+        <div class="student-board-header">
+          <div class="student-board-title">
+            <span>📡</span> Live Station Token Board
+            <span class="live-dot-pulse" style="display:inline-block;width:8px;height:8px;background:#10b981;border-radius:50%;margin-left:6px;"></span>
+          </div>
+          <span style="font-size:0.8rem;font-weight:700;color:#059669;">LIVE CAMPUS BROADCAST</span>
+        </div>
+        <div class="board-grid-compact" id="studentLiveBoardGrid">
+          <!-- Populated live via SSE -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Swiggy "What's on your mind?" Category Chiclet Carousel -->
+    <div class="section-container swiggy-chiclet-section">
+      <div class="section-header-row chiclet-header-row">
+        <div>
+          <h2 class="section-title chiclet-title">What's on your mind?</h2>
+          <p class="section-subtitle">Pick from traditional morning tiffins, hearty meals, or refreshing drinks.</p>
+        </div>
+        <div class="chiclet-carousel-nav">
+          <button class="chiclet-nav-btn prev" onclick="scrollChiclets(-1)" aria-label="Previous categories">‹</button>
+          <button class="chiclet-nav-btn next" onclick="scrollChiclets(1)" aria-label="Next categories">›</button>
+        </div>
+      </div>
+
+      <div class="swiggy-chiclet-track" id="swiggyChicletTrack">
+        <div class="chiclet-item" onclick="filterMenuCategory('All')">
+          <div class="chiclet-circle-box">
+            <span class="chiclet-emoji">🍽️</span>
+          </div>
+          <span class="chiclet-name">All Items</span>
+        </div>
+        <div class="chiclet-item" onclick="filterMenuCategory('Breakfast')">
+          <div class="chiclet-circle-box">
+            <span class="chiclet-emoji">🥞</span>
+          </div>
+          <span class="chiclet-name">Breakfast</span>
+        </div>
+        <div class="chiclet-item" onclick="filterMenuCategory('Rice & Meals')">
+          <div class="chiclet-circle-box">
+            <span class="chiclet-emoji">🍛</span>
+          </div>
+          <span class="chiclet-name">Rice &amp; Meals</span>
+        </div>
+        <div class="chiclet-item" onclick="filterMenuCategory('Tiffin')">
+          <div class="chiclet-circle-box">
+            <span class="chiclet-emoji">🥘</span>
+          </div>
+          <span class="chiclet-name">Tiffin</span>
+        </div>
+        <div class="chiclet-item" onclick="filterMenuCategory('Non-Veg')">
+          <div class="chiclet-circle-box">
+            <span class="chiclet-emoji">🍗</span>
+          </div>
+          <span class="chiclet-name">Non-Veg</span>
+        </div>
+        <div class="chiclet-item" onclick="filterMenuCategory('Beverages')">
+          <div class="chiclet-circle-box">
+            <span class="chiclet-emoji">☕</span>
+          </div>
+          <span class="chiclet-name">Beverages</span>
+        </div>
+        <div class="chiclet-item" onclick="filterMenuCategory('Specials')">
+          <div class="chiclet-circle-box special-chiclet">
+            <span class="chiclet-emoji">🔥</span>
+          </div>
+          <span class="chiclet-name">Specials</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Today's Specials Combos Section -->
+    <div class="section-container specials-section">
+      <div class="section-header-row">
+        <div>
+          <span class="section-tag">LIMITED TIME DEALS</span>
+          <h2 class="section-title">Today's Specials</h2>
+          <p class="section-subtitle">Specially curated combos for college students at pocket-friendly rates.</p>
+        </div>
+        <button class="btn-text-link" onclick="navTo('offers')">View All Deals →</button>
+      </div>
+
+      <div class="specials-grid">
+        <!-- Breakfast Combo -->
+        <div class="special-combo-card">
+          <div class="special-combo-tag">SAVE ₹10</div>
+          <div class="special-combo-img-wrap">
+            <img src="/static/images/idli.jpg" alt="Breakfast Combo" class="special-img"
+              onerror="this.onerror=null;this.src='/static/images/pongal.jpg';" />
+          </div>
+          <div class="special-combo-body">
+            <h3 class="special-title">🔥 Breakfast Combo</h3>
+            <p class="special-items">2 Soft Idlis + Crispy Vada + Sambar + Chutneys</p>
+            <div class="special-footer">
+              <div class="special-price">
+                <span class="price-val">₹50</span>
+                <span class="price-orig">₹60</span>
+              </div>
+              <button class="btn-combo-add" onclick="addComboToCart('breakfast')">
+                <span>+ Add to Cart</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Student Combo -->
+        <div class="special-combo-card">
+          <div class="special-combo-tag">BEST VALUE</div>
+          <div class="special-combo-img-wrap">
+            <img src="/static/images/masala_dosa.jpg" alt="Student Combo" class="special-img"
+              onerror="this.onerror=null;this.src='/static/images/filter_coffee.jpg';" />
+          </div>
+          <div class="special-combo-body">
+            <h3 class="special-title">🔥 Student Combo</h3>
+            <p class="special-items">Crispy Masala Dosa + Steaming Hot Filter Coffee</p>
+            <div class="special-footer">
+              <div class="special-price">
+                <span class="price-val">₹65</span>
+                <span class="price-orig">₹75</span>
+              </div>
+              <button class="btn-combo-add" onclick="addComboToCart('student')">
+                <span>+ Add to Cart</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Biriyani Combo -->
+        <div class="special-combo-card">
+          <div class="special-combo-tag">CHEF PICK</div>
+          <div class="special-combo-img-wrap">
+            <img src="/static/images/biriyani.jpg" alt="Biriyani Combo" class="special-img"
+              onerror="this.onerror=null;this.src='/static/images/chicken_65.jpg';" />
+          </div>
+          <div class="special-combo-body">
+            <h3 class="special-title">🔥 Biriyani Combo</h3>
+            <p class="special-items">Authentic Chicken Biriyani + Chilled Fresh Lime Juice</p>
+            <div class="special-footer">
+              <div class="special-price">
+                <span class="price-val">₹140</span>
+                <span class="price-orig">₹150</span>
+              </div>
+              <button class="btn-combo-add" onclick="addComboToCart('biriyani')">
+                <span>+ Add to Cart</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Evening Tiffin Combo -->
+        <div class="special-combo-card">
+          <div class="special-combo-tag">POPULAR</div>
+          <div class="special-combo-img-wrap">
+            <img src="/static/images/parotta.jpg" alt="Evening Tiffin Combo" class="special-img"
+              onerror="this.onerror=null;this.src='/static/images/tea.jpg';" />
+          </div>
+          <div class="special-combo-body">
+            <h3 class="special-title">🔥 Evening Tiffin Combo</h3>
+            <p class="special-items">2 Layered Parottas + Spicy Salna + Hot Masala Tea</p>
+            <div class="special-footer">
+              <div class="special-price">
+                <span class="price-val">₹55</span>
+                <span class="price-orig">₹60</span>
+              </div>
+              <button class="btn-combo-add" onclick="addComboToCart('tiffin')">
+                <span>+ Add to Cart</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Featured Bestsellers Showcase -->
+    <div class="section-container">
+      <div class="section-header-row">
+        <div>
+          <span class="section-tag">MOST ORDERED</span>
+          <h2 class="section-title">Campus Bestsellers</h2>
+          <p class="section-subtitle">The most loved South Indian canteen delicacies.</p>
+        </div>
+        <button class="btn-primary" onclick="navTo('menu')">Explore Full Menu →</button>
+      </div>
+      <div class="food-cards-grid" id="homeBestsellersGrid">
+        <!-- Rendered dynamically by JS -->
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ── 2. MENU VIEW ─────────────────────────────────────────── -->
+  <section class="app-view" id="view-menu">
+    <div class="section-container">
+
+      <!-- Menu Header -->
+      <div class="menu-page-header">
+        <h1 class="page-main-title">Our Menu</h1>
+        <p class="page-main-subtitle">Authentic Tamil Nadu flavours, freshly prepared with traditional spices.</p>
+      </div>
+
+      <!-- Controls Bar: Search, Category Chips & Sort -->
+      <div class="menu-filter-bar">
+        <!-- Search input -->
+        <div class="search-box-wrap">
+          <span class="search-input-icon">🔍</span>
+          <input
+            type="text"
+            id="searchInput"
+            class="search-input-field"
+            placeholder="Search for dosa, biriyani, coffee..."
+            autocomplete="off"
+            aria-label="Search food"
+          />
+          <button class="search-clear-cross" id="searchClearBtn" onclick="clearMenuSearch()" style="display:none;">✕</button>
+        </div>
+
+        <!-- Sort dropdown -->
+        <div class="sort-box-wrap">
+          <label for="sortSelect" class="sort-label">Sort by:</label>
+          <select id="sortSelect" class="sort-select" onchange="handleSortChange()">
+            <option value="popular">Popular / Rating</option>
+            <option value="price-asc">Price: Low to High</option>
+            <option value="price-desc">Price: High to Low</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Category Filter Pills -->
+      <div class="menu-category-pills" id="categoryPillsContainer" role="tablist">
+        <!-- Filled by JS: All, Breakfast, Rice & Meals, Tiffin, Non-Veg, Beverages, Specials -->
+      </div>
+
+      <!-- Menu Status / Counter -->
+      <div class="menu-status-bar">
+        <span class="dish-counter-badge" id="dishCounterText">Loading menu...</span>
+      </div>
+
+      <!-- Loading State -->
+      <div class="state-loader" id="menuLoadingSpinner">
+        <div class="spinner-ring"></div>
+        <p>Loading fresh dishes from kitchen...</p>
+      </div>
+
+      <!-- Menu Food Cards Grid -->
+      <div class="food-cards-grid hidden" id="fullMenuGrid" role="region" aria-live="polite"></div>
+
+      <!-- Empty Search Result -->
+      <div class="empty-state-box hidden" id="emptyMenuState">
+        <div class="empty-state-icon">🍽️</div>
+        <h3>No dishes found</h3>
+        <p id="emptyMenuMessage">Try searching for something else like "dosa", "biriyani", or "coffee".</p>
+        <button class="btn-secondary" onclick="clearMenuSearch()">Show All Dishes</button>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── 3. OFFERS VIEW ───────────────────────────────────────── -->
+  <section class="app-view" id="view-offers">
+    <div class="section-container">
+      <div class="menu-page-header">
+        <h1 class="page-main-title">Today's Deals &amp; Combos</h1>
+        <p class="page-main-subtitle">Enjoy exclusive discounts on traditional South Indian food combos.</p>
+      </div>
+
+      <div class="specials-grid" style="margin-top:24px;">
+        <!-- Card 1 -->
+        <div class="special-combo-card">
+          <div class="special-combo-tag">SAVE ₹10</div>
+          <div class="special-combo-img-wrap">
+            <img src="/static/images/idli.jpg" alt="Student Breakfast Combo" class="special-img"
+              onerror="this.onerror=null;this.src='/static/images/pongal.jpg';" />
+          </div>
+          <div class="special-combo-body">
+            <h3 class="special-title">🥞 Student Breakfast Combo</h3>
+            <p class="special-items">2 Hot Idlis + 1 Medu Vada + Unlimited Sambar + 2 Chutneys</p>
+            <div class="special-footer">
+              <div class="special-price">
+                <span class="price-val">₹50</span>
+                <span class="price-orig">₹60</span>
+              </div>
+              <button class="btn-combo-add" onclick="addComboToCart('breakfast')">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="special-combo-card">
+          <div class="special-combo-tag">POPULAR</div>
+          <div class="special-combo-img-wrap">
+            <img src="/static/images/masala_dosa.jpg" alt="Dosa & Coffee Combo" class="special-img"
+              onerror="this.onerror=null;this.src='/static/images/filter_coffee.jpg';" />
+          </div>
+          <div class="special-combo-body">
+            <h3 class="special-title">☕ Dosa &amp; Filter Coffee Combo</h3>
+            <p class="special-items">Golden Crispy Masala Dosa + Traditional Filter Kaapi in Davara</p>
+            <div class="special-footer">
+              <div class="special-price">
+                <span class="price-val">₹65</span>
+                <span class="price-orig">₹75</span>
+              </div>
+              <button class="btn-combo-add" onclick="addComboToCart('student')">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="special-combo-card">
+          <div class="special-combo-tag">FEAST DEAL</div>
+          <div class="special-combo-img-wrap">
+            <img src="/static/images/biriyani.jpg" alt="Biriyani Special" class="special-img"
+              onerror="this.onerror=null;this.src='/static/images/chicken_65.jpg';" />
+          </div>
+          <div class="special-combo-body">
+            <h3 class="special-title">🍗 Biriyani Special Deal</h3>
+            <p class="special-items">Aromatic Chicken Biriyani with Tender Meat + Fresh Chilled Lime Soda</p>
+            <div class="special-footer">
+              <div class="special-price">
+                <span class="price-val">₹140</span>
+                <span class="price-orig">₹150</span>
+              </div>
+              <button class="btn-combo-add" onclick="addComboToCart('biriyani')">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 4 -->
+        <div class="special-combo-card">
+          <div class="special-combo-tag">EVENING SNACK</div>
+          <div class="special-combo-img-wrap">
+            <img src="/static/images/parotta.jpg" alt="Evening Tiffin Combo" class="special-img"
+              onerror="this.onerror=null;this.src='/static/images/tea.jpg';" />
+          </div>
+          <div class="special-combo-body">
+            <h3 class="special-title">🫓 Evening Tiffin Combo</h3>
+            <p class="special-items">2 Flaky Malabar Parottas + Spicy Veg/Chicken Salna + Cardamom Chai</p>
+            <div class="special-footer">
+              <div class="special-price">
+                <span class="price-val">₹55</span>
+                <span class="price-orig">₹60</span>
+              </div>
+              <button class="btn-combo-add" onclick="addComboToCart('tiffin')">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 4. CART VIEW ─────────────────────────────────────────── -->
+  <section class="app-view" id="view-cart">
+    <div class="section-container" style="max-width:860px;">
+      <div class="menu-page-header">
+        <h1 class="page-main-title">Your Cart</h1>
+        <p class="page-main-subtitle">Review items in your tray before checking out.</p>
+      </div>
+
+      <!-- Empty Cart Screen -->
+      <div class="empty-state-box hidden" id="emptyCartView">
+        <div class="empty-state-icon">🛒</div>
+        <h3>Your cart is empty</h3>
+        <p>Looks like you haven't added any Tamil Nadu delicacies to your cart yet.</p>
+        <button class="btn-primary" onclick="navTo('menu')">Browse Canteen Menu</button>
+      </div>
+
+      <!-- Cart Content Box -->
+      <div class="cart-layout-card" id="cartContentBox">
+        <div class="cart-items-wrapper" id="cartItemsContainer">
+          <!-- Filled dynamically by JS -->
+        </div>
+
+        <!-- Bill Summary -->
+        <div class="cart-bill-summary">
+          <div class="bill-line">
+            <span>Item Subtotal</span>
+            <span id="cartSubtotalText">₹0</span>
+          </div>
+          <div class="bill-line">
+            <span>Student Canteen Tax / Fee</span>
+            <span class="text-green">₹0 (Free)</span>
+          </div>
+          <div class="bill-divider"></div>
+          <div class="bill-line bill-total-line">
+            <span>Grand Total</span>
+            <span class="bill-total-price" id="cartGrandTotalText">₹0</span>
+          </div>
+        </div>
+
+        <!-- Cart Actions -->
+        <div class="cart-actions-row">
+          <button class="btn-secondary" onclick="navTo('menu')">
+            ← Continue Shopping
+          </button>
+          <button class="btn-primary btn-checkout-action" onclick="navTo('checkout')">
+            Proceed to Checkout →
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 5. CHECKOUT REVIEW VIEW ──────────────────────────────── -->
+  <section class="app-view" id="view-checkout">
+    <div class="section-container" style="max-width:760px;">
+      <div class="menu-page-header">
+        <h1 class="page-main-title">Review Your Order</h1>
+        <p class="page-main-subtitle">Please verify your items and pickup counter before paying.</p>
+      </div>
+
+      <div class="checkout-review-card">
+        <!-- Pickup Counter Banner -->
+        <div class="pickup-counter-banner">
+          <div class="counter-badge">📍 PICKUP POINT</div>
+          <div class="counter-info">
+            <strong>Main Campus Canteen — Counter #2</strong>
+            <p>Your food will be prepared and served in token order.</p>
+          </div>
+        </div>
+
+        <!-- Order Summary Items -->
+        <div class="checkout-items-list" id="checkoutItemsList">
+          <!-- Filled by JS -->
+        </div>
+
+        <!-- Total row -->
+        <div class="checkout-total-row">
+          <span>Total Amount Payable:</span>
+          <span class="checkout-total-val" id="checkoutTotalText">₹0</span>
+        </div>
+
+        <p class="checkout-notice">
+          ℹ️ <strong>Note:</strong> Token will be generated immediately after your payment is confirmed.
+        </p>
+
+        <!-- Buttons -->
+        <div class="checkout-btn-group">
+          <button class="btn-secondary" onclick="navTo('cart')">← Back to Cart</button>
+          <button class="btn-primary btn-lg" onclick="navTo('payment')">
+            Continue to Payment →
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 6. PAYMENT VIEW ──────────────────────────────────────── -->
+  <section class="app-view" id="view-payment">
+    <div class="section-container" style="max-width:680px;">
+      <div class="menu-page-header">
+        <h1 class="page-main-title">Complete Your Payment</h1>
+        <p class="page-main-subtitle">Choose a fast payment application to confirm your order.</p>
+      </div>
+
+      <div class="payment-card-box">
+        <!-- Payable Banner -->
+        <div class="pay-amount-banner">
+          <span>Order Total</span>
+          <span class="pay-amount-huge" id="paymentAmountText">₹0</span>
+        </div>
+
+        <div class="pay-methods-title">Select Payment Method:</div>
+
+        <!-- Selectable Payment Cards -->
+        <div class="pay-options-list">
+
+          <!-- Google Pay -->
+          <div class="pay-option-card active" id="payOptGPay" onclick="choosePaymentApp('Google Pay')">
+            <div class="pay-opt-radio">
+              <span class="radio-inner"></span>
+            </div>
+            <div class="pay-opt-icon gpay-icon">🟢</div>
+            <div class="pay-opt-info">
+              <div class="pay-opt-title">Google Pay</div>
+              <div class="pay-opt-sub">Pay securely using Google Pay UPI</div>
+            </div>
+          </div>
+
+          <!-- PhonePe -->
+          <div class="pay-option-card" id="payOptPhonePe" onclick="choosePaymentApp('PhonePe')">
+            <div class="pay-opt-radio">
+              <span class="radio-inner"></span>
+            </div>
+            <div class="pay-opt-icon phonepe-icon">🟣</div>
+            <div class="pay-opt-info">
+              <div class="pay-opt-title">PhonePe</div>
+              <div class="pay-opt-sub">Pay securely using PhonePe app</div>
+            </div>
+          </div>
+
+          <!-- Any UPI -->
+          <div class="pay-option-card" id="payOptUPI" onclick="choosePaymentApp('UPI')">
+            <div class="pay-opt-radio">
+              <span class="radio-inner"></span>
+            </div>
+            <div class="pay-opt-icon upi-icon">🟡</div>
+            <div class="pay-opt-info">
+              <div class="pay-opt-title">UPI Application / ID</div>
+              <div class="pay-opt-sub">Pay using Paytm, BHIM, or any UPI app</div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- UPI ID Input Field -->
+        <div class="upi-id-field-wrap">
+          <label for="upiIdInput" class="upi-label">Your UPI ID (VPA):</label>
+          <div class="upi-input-group">
+            <input
+              type="text"
+              id="upiIdInput"
+              class="upi-input"
+              value="student@okaxis"
+              placeholder="e.g. mobile@upi"
+              aria-label="Enter UPI ID"
+            />
+            <span class="upi-verified-badge">✓ Verified</span>
+          </div>
+        </div>
+
+        <!-- Pay Button -->
+        <button class="btn-primary btn-pay-now" id="btnExecutePayment" onclick="processOrderPayment()">
+          <span id="btnPayText">Pay ₹0 Now</span>
+        </button>
+
+        <p class="pay-security-footnote">
+          🔒 256-Bit SSL Canteen Demo Gateway. No real bank funds deducted.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 7. TOKEN / CONFIRMATION VIEW ─────────────────────────── -->
+  <section class="app-view" id="view-token">
+    <div class="section-container" style="max-width:620px;">
+      <div class="token-confirmation-card">
+
+        <!-- Success Header -->
+        <div class="token-success-badge">
+          <span class="badge-check">✓</span> PAYMENT SUCCESSFUL
+        </div>
+
+        <div class="token-banner-wrap">
+          <div class="token-header-lbl">YOUR OFFICIAL ORDER TOKEN</div>
+          <div class="token-number-hero" id="confirmTokenNumber">T-001</div>
+          <div class="token-sub-details">
+            <span id="confirmTokenAmount">₹0 Paid</span> • <span id="confirmPayMethod">Google Pay</span>
+          </div>
+        </div>
+
+        <!-- Queue Status Pill -->
+        <div class="token-queue-indicator">
+          <div class="queue-stat-badge">
+            <span class="stat-prefix">Queue Position:</span>
+            <strong id="confirmQueuePos">#1</strong>
+          </div>
+          <div class="status-indicator-tag status-waiting" id="confirmStatusTag">
+            ⏳ WAITING
+          </div>
+        </div>
+
+        <!-- Summary list -->
+        <div class="token-order-recap" id="confirmItemsRecap">
+          <!-- Filled by JS -->
+        </div>
+
+        <!-- Action CTAs -->
+        <div class="token-cta-group">
+          <button class="btn-primary btn-lg" onclick="navTo('track')">
+            ⏱️ Track My Order Live
+          </button>
+          <button class="btn-secondary" onclick="navTo('orders')">
+            📋 View All My Orders
+          </button>
+          <button class="btn-text-link" onclick="navTo('menu')">
+            + Order More Food
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 8. TRACK ORDER VIEW ──────────────────────────────────── -->
+  <section class="app-view" id="view-track">
+    <div class="section-container" style="max-width:760px;">
+      <div class="menu-page-header">
+        <h1 class="page-main-title">Track Your Order</h1>
+        <p class="page-main-subtitle">Live real-time updates directly from the canteen kitchen counter.</p>
+      </div>
+
+      <!-- Token Switcher / Input -->
+      <div class="track-search-box">
+        <label for="trackTokenInput">Enter Token to Track:</label>
+        <div class="track-input-row">
+          <input type="text" id="trackTokenInput" placeholder="e.g. T-001" />
+          <button class="btn-primary" onclick="handleManualTrack()">Track</button>
+        </div>
+      </div>
+
+      <!-- Live Tracking Card -->
+      <div class="tracking-card" id="trackingDisplayBox">
+        <div class="tracking-top-bar">
+          <div>
+            <span class="track-label">TOKEN</span>
+            <div class="track-active-token" id="trackActiveToken">—</div>
+          </div>
+          <div class="track-live-badge">
+            <span class="live-dot-pulse"></span> LIVE REFRESHING
+          </div>
+        </div>
+
+        <!-- Visual Timeline Stepper -->
+        <div class="timeline-stepper">
+          <!-- Step 1: Placed -->
+          <div class="timeline-step done" id="tstep-placed">
+            <div class="step-circle">✓</div>
+            <div class="step-title">Order Placed</div>
+            <div class="step-sub">Verified</div>
+          </div>
+
+          <div class="timeline-connector done" id="tconn-1"></div>
+
+          <!-- Step 2: Paid -->
+          <div class="timeline-step done" id="tstep-paid">
+            <div class="step-circle">✓</div>
+            <div class="step-title">Paid</div>
+            <div class="step-sub">Online UPI</div>
+          </div>
+
+          <div class="timeline-connector done" id="tconn-2"></div>
+
+          <!-- Step 3: Waiting -->
+          <div class="timeline-step" id="tstep-waiting">
+            <div class="step-circle">⏳</div>
+            <div class="step-title">Waiting</div>
+            <div class="step-sub">In Kitchen FIFO</div>
+          </div>
+
+          <div class="timeline-connector" id="tconn-3"></div>
+
+          <!-- Step 4: Preparing -->
+          <div class="timeline-step" id="tstep-preparing">
+            <div class="step-circle">🍳</div>
+            <div class="step-title">Preparing</div>
+            <div class="step-sub">On Stove</div>
+          </div>
+
+          <div class="timeline-connector" id="tconn-4"></div>
+
+          <!-- Step 5: Ready -->
+          <div class="timeline-step" id="tstep-ready">
+            <div class="step-circle">✅</div>
+            <div class="step-title">Ready</div>
+            <div class="step-sub">At Counter</div>
+          </div>
+
+          <div class="timeline-connector" id="tconn-5"></div>
+
+          <!-- Step 6: Served -->
+          <div class="timeline-step" id="tstep-served">
+            <div class="step-circle">🎉</div>
+            <div class="step-title">Served</div>
+            <div class="step-sub">Completed</div>
+          </div>
+        </div>
+
+        <!-- Real-time Queue Advice Banner -->
+        <div class="tracking-banner" id="trackingAdviceBanner">
+          <div class="advice-icon" id="adviceIcon">⏳</div>
+          <div class="advice-text">
+            <strong id="adviceHeadline">Your order is queued in the kitchen.</strong>
+            <p id="adviceSub">Estimated queue ahead: <span id="trackQueueAhead">—</span></p>
+          </div>
+        </div>
+
+        <!-- Tracked Order Items List -->
+        <div class="track-order-items" id="trackOrderItemsList"></div>
+
+        <!-- Multi-Station Preparation Tasks Breakdown -->
+        <div class="multi-station-tasks-wrap">
+          <div class="multi-station-tasks-header">
+            <span>🍳</span> Station-Wise Preparation Status
+          </div>
+          <div id="trackStationTasksList">
+            <!-- Populated dynamically with station task cards -->
+          </div>
+        </div>
+
+        <!-- Student Order Actions (Edit / Cancel) -->
+        <div class="order-actions-bar" id="orderActionsBar">
+          <button class="btn-order-edit" id="btnOpenEditModal" onclick="openEditOrderModal()">
+            <span>✏️</span> Edit Items (+5m prep penalty)
+          </button>
+          <button class="btn-order-cancel" id="btnCancelOrder" onclick="handleCustomerCancelOrder()">
+            <span>❌</span> Cancel Order &amp; Refund
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 9. MY ORDERS VIEW ────────────────────────────────────── -->
+  <section class="app-view" id="view-orders">
+    <div class="section-container" style="max-width:860px;">
+      <div class="menu-page-header">
+        <h1 class="page-main-title">My Orders</h1>
+        <p class="page-main-subtitle">History of orders placed during this session.</p>
+      </div>
+
+      <div class="my-orders-list" id="myOrdersContainer">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SWIGGY FLOATING BOTTOM CART STRIP (DESKTOP & MOBILE)
+══════════════════════════════════════════════════════════════ -->
+<div class="swiggy-bottom-cart-bar hidden" id="swiggyBottomCartBar" onclick="navTo('cart')" role="button" aria-label="View Cart Tray">
+  <div class="cart-bar-left">
+    <div class="cart-bar-badge" id="cartBarCount">0 ITEMS</div>
+    <span class="cart-bar-sep">•</span>
+    <span class="cart-bar-total" id="cartBarTotal">₹0</span>
+  </div>
+  <div class="cart-bar-right">
+    <span class="cart-bar-action">VIEW CART 🛒</span>
+    <span class="cart-bar-arrow">→</span>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     PAYMENT PROCESSING OVERLAY LOADER
+══════════════════════════════════════════════════════════════ -->
+<div class="payment-loader-overlay hidden" id="payLoaderOverlay" role="dialog" aria-modal="true">
+  <div class="payment-loader-box">
+    <div class="loader-spinner-ring"></div>
+    <h3>Processing Payment...</h3>
+    <p>Connecting securely to UPI Canteen Gateway</p>
+    <small>Please do not refresh or close this window.</small>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     MOBILE FIXED BOTTOM NAVIGATION
+══════════════════════════════════════════════════════════════ -->
+<nav class="mobile-bottom-nav" aria-label="Mobile Navigation">
+  <button class="mob-nav-item active" id="mob-home" onclick="navTo('home')">
+    <span class="mob-nav-icon">🏠</span>
+    <span class="mob-nav-txt">Home</span>
+  </button>
+  <button class="mob-nav-item" id="mob-menu" onclick="navTo('menu')">
+    <span class="mob-nav-icon">🍽️</span>
+    <span class="mob-nav-txt">Menu</span>
+  </button>
+  <button class="mob-nav-item" id="mob-track" onclick="navTo('track')">
+    <span class="mob-nav-icon">⏱️</span>
+    <span class="mob-nav-txt">Track</span>
+  </button>
+  <button class="mob-nav-item" id="mob-orders" onclick="navTo('orders')">
+    <span class="mob-nav-icon">📋</span>
+    <span class="mob-nav-txt">Orders</span>
+  </button>
+  <button class="mob-nav-item mob-cart-item" id="mob-cart" onclick="navTo('cart')">
+    <span class="mob-nav-icon">🛒</span>
+    <span class="mob-nav-txt">Cart</span>
+    <span class="mob-cart-badge" id="mobCartBadge">0</span>
+  </button>
+</nav>
+
+<!-- ══════════════════════════════════════════════════════════════
+     FOOTER
+══════════════════════════════════════════════════════════════ -->
+<footer class="app-footer">
+  <div class="footer-container">
+    <div class="footer-col brand-col">
+      <div class="footer-brand">🍽️ SMART CANTEEN</div>
+      <p class="footer-tagline">"Fresh. Fast. Traditional."</p>
+      <p class="footer-desc">
+        A premium digital canteen ordering and queue token system for college campuses. Skip the line, enjoy authentic Tamil Nadu flavors.
+      </p>
+    </div>
+
+    <div class="footer-col">
+      <h4>Quick Links</h4>
+      <ul>
+        <li><a href="#home" onclick="navTo('home'); return false;">Home</a></li>
+        <li><a href="#menu" onclick="navTo('menu'); return false;">Our Menu</a></li>
+        <li><a href="#offers" onclick="navTo('offers'); return false;">Today's Deals</a></li>
+        <li><a href="#orders" onclick="navTo('orders'); return false;">My Orders</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-col">
+      <h4>Order Tracking</h4>
+      <ul>
+        <li><a href="#track" onclick="navTo('track'); return false;">Track Token</a></li>
+        <li><a href="/staff">Canteen Staff Counter</a></li>
+        <li><a href="#cart" onclick="navTo('cart'); return false;">View Cart</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-col">
+      <h4>Campus Support</h4>
+      <ul>
+        <li>📍 Counter #2, Main Campus Canteen</li>
+        <li>⏰ Mon–Sat: 7:30 AM – 9:00 PM</li>
+        <li>⚡ 100% Cashless &amp; FIFO Queue</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="footer-bottom">
+    <p>© 2026 Smart Canteen. All rights reserved. Designed with authentic Tamil Nadu flavours.</p>
+  </div>
+</footer>
+
+<!-- ══════════════════════════════════════════════════════════════
+     FLOATING TOAST & CONFETTI CONTAINERS
+══════════════════════════════════════════════════════════════ -->
+<div class="toast-stack-wrap" id="toastWrap" aria-live="polite"></div>
+<div class="confetti-sky" id="confettiContainer" aria-hidden="true"></div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     EDIT ORDER MODAL DIALOG
+══════════════════════════════════════════════════════════════ -->
+<div class="modal-backdrop hidden" id="editOrderModalBackdrop">
+  <div class="edit-modal-box">
+    <div class="modal-header">
+      <h3 class="modal-title">✏️ Edit Order <span id="editModalTokenTitle">T-001</span></h3>
+      <button class="modal-close-btn" onclick="closeEditOrderModal()">✕</button>
+    </div>
+
+    <div class="penalty-callout">
+      <strong>⚠️ Schedule Notice:</strong> Editing an active order adds <strong>+5 minutes</strong> extra preparation penalty and dynamically re-sorts your station queue priority based on the new estimated ready time.
+    </div>
+
+    <div id="editItemsListContainer">
+      <!-- Populated by JS -->
+    </div>
+
+    <div class="edit-add-item-row">
+      <select class="edit-select-dish" id="editAddDishSelect">
+        <option value="">-- Add another dish to tray --</option>
+      </select>
+      <button class="btn-secondary" onclick="addDishToEditList()" style="padding:10px 16px;">+ Add</button>
+    </div>
+
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:24px;padding-top:16px;border-top:1px solid #f1f5f9;">
+      <div>
+        <span style="font-size:0.85rem;color:#64748b;">New Estimated Total:</span>
+        <div style="font-size:1.3rem;font-weight:900;color:#0f172a;" id="editModalTotalText">₹0</div>
+      </div>
+      <div style="display:flex;gap:10px;">
+        <button class="btn-secondary" onclick="closeEditOrderModal()">Cancel</button>
+        <button class="btn-primary" onclick="submitOrderEdit()">Save &amp; Update Order</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     GUEST RESTRICTION MODAL (Requirement 2)
+══════════════════════════════════════════════════════════════ -->
+<div class="modal-backdrop hidden" id="guestRestrictionModal">
+  <div class="guest-modal-card">
+    <div class="guest-modal-icon">🔐</div>
+    <h2 class="guest-modal-title">Sign in required</h2>
+    <p class="guest-modal-desc">Please sign in to place an order, make payment, and receive your live canteen token.</p>
+    <div class="guest-modal-actions">
+      <button class="btn btn-primary" style="padding:12px 24px; font-weight:800; font-size:1rem;" onclick="closeGuestModal(); openAuthModal('login');">
+        <span>🔐</span> Sign In
+      </button>
+      <button class="btn btn-secondary" style="padding:12px 20px; font-weight:700;" onclick="closeGuestModal()">
+        Continue Browsing
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     AUTHENTICATION MODAL (SIGN IN / CREATE ACCOUNT)
+══════════════════════════════════════════════════════════════ -->
+<div class="modal-backdrop hidden" id="authModalBackdrop">
+  <div class="auth-modal-card">
+    <div class="auth-modal-top">
+      <div class="auth-tab-buttons">
+        <button class="auth-tab-btn active" id="authTabBtnLogin" onclick="switchAuthTab('login')">Sign In</button>
+        <button class="auth-tab-btn" id="authTabBtnRegister" onclick="switchAuthTab('register')">Create Account</button>
+      </div>
+      <button class="auth-modal-close" onclick="closeAuthModal()">✕</button>
+    </div>
+
+    <!-- Sign In Tab Panel -->
+    <div class="auth-tab-panel" id="authPanelLogin">
+      <p class="auth-helper-text">Sign in to your student or staff canteen account to place orders</p>
+      <div class="auth-error-alert" id="authLoginError" style="display:none;"></div>
+
+      <form onsubmit="handleLoginSubmit(event)">
+        <div class="auth-form-field">
+          <label>Email Address</label>
+          <input type="email" id="loginEmailInput" required placeholder="e.g. student@smartcanteen.com" />
+        </div>
+        <div class="auth-form-field">
+          <label>Password</label>
+          <input type="password" id="loginPasswordInput" required placeholder="••••••••••••" />
+        </div>
+        <button type="submit" class="btn btn-primary" id="loginSubmitBtn" style="width:100%; padding:14px; font-size:1rem; font-weight:800; margin-top:8px;">
+          <span>Sign In</span> →
+        </button>
+      </form>
+
+      <!-- Quick Demo Sign In Box -->
+      <div class="auth-demo-shortcuts">
+        <span class="demo-shortcuts-label">⚡ Quick Demo Sign In:</span>
+        <div class="demo-shortcuts-chips">
+          <button type="button" class="demo-user-chip" onclick="fillDemoCredentials('student')">👨‍🎓 Student (Karthik)</button>
+          <button type="button" class="demo-user-chip" onclick="fillDemoCredentials('staff')">👨‍🍳 Staff (Chef Murugan)</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Register Tab Panel -->
+    <div class="auth-tab-panel" id="authPanelRegister" style="display:none;">
+      <p class="auth-helper-text">Register a new customer/student account</p>
+      <div class="auth-error-alert" id="authRegisterError" style="display:none;"></div>
+
+      <form onsubmit="handleRegisterSubmit(event)">
+        <div class="auth-form-field">
+          <label>Full Name</label>
+          <input type="text" id="regNameInput" required placeholder="e.g. Ramesh Kumar" />
+        </div>
+        <div class="auth-form-field">
+          <label>College Email</label>
+          <input type="email" id="regEmailInput" required placeholder="e.g. ramesh@college.edu" />
+        </div>
+        <div class="auth-form-field">
+          <label>Phone Number (optional)</label>
+          <input type="tel" id="regPhoneInput" placeholder="e.g. +91 98401 23456" />
+        </div>
+        <div class="auth-form-field">
+          <label>Password</label>
+          <input type="password" id="regPasswordInput" required placeholder="At least 4 characters" />
+        </div>
+        <button type="submit" class="btn btn-primary" id="regSubmitBtn" style="width:100%; padding:14px; font-size:1rem; font-weight:800; margin-top:8px;">
+          <span>Create Account &amp; Sign In</span> →
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Scripts -->
+<script src="/static/app.js"></script>
+</body>
+</html>
+

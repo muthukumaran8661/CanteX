@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <!-- Background -->
+  <circle cx="100" cy="100" r="95" fill="#FFF3E0"/>
+  <!-- Saucer (davara) -->
+  <ellipse cx="100" cy="172" rx="58" ry="12" fill="#BDBDBD"/>
+  <ellipse cx="100" cy="170" rx="58" ry="12" fill="#E0E0E0"/>
+  <ellipse cx="100" cy="168" rx="55" ry="10" fill="#F5F5F5"/>
+  <!-- Davara (wide shallow cup) - saucer for drinking -->
+  <path d="M55 148 Q52 170 100 170 Q148 170 145 148 Z" fill="#7B3F00"/>
+  <path d="M57 148 Q54 168 100 168 Q146 168 143 148 Z" fill="#8B4513"/>
+  <path d="M59 148 Q56 166 100 166 Q144 166 141 148 Z" fill="#A0522D"/>
+  <!-- Davara rim -->
+  <ellipse cx="100" cy="148" rx="43" ry="10" fill="#6B2F00"/>
+  <ellipse cx="100" cy="146" rx="43" ry="10" fill="#7B3F00"/>
+  <!-- Coffee in davara -->
+  <ellipse cx="100" cy="146" rx="40" ry="8" fill="#4E2500"/>
+  <ellipse cx="100" cy="144" rx="38" ry="7" fill="#5D3000"/>
+  <ellipse cx="100" cy="142" rx="36" ry="6" fill="#6F3500"/>
+  <!-- Foam/milk froth on top -->
+  <ellipse cx="100" cy="141" rx="34" ry="5" fill="#FFFDE7" opacity="0.9"/>
+  <ellipse cx="95" cy="140" rx="15" ry="3" fill="#FFF9C4"/>
+  <ellipse cx="110" cy="141" rx="10" ry="2.5" fill="#FFFDE7"/>
+  <!-- Tumbler (tall cup above davara) -->
+  <path d="M72 105 Q70 145 100 145 Q130 145 128 105 Z" fill="#8D6E63"/>
+  <path d="M74 105 Q72 143 100 143 Q128 143 126 105 Z" fill="#A1887F"/>
+  <!-- Tumbler rim -->
+  <ellipse cx="100" cy="105" rx="28" ry="8" fill="#6D4C41"/>
+  <ellipse cx="100" cy="103" rx="28" ry="8" fill="#795548"/>
+  <!-- Coffee liquid in tumbler -->
+  <ellipse cx="100" cy="103" rx="24" ry="6" fill="#3E1500"/>
+  <ellipse cx="100" cy="101" rx="23" ry="5.5" fill="#4E2500"/>
+  <ellipse cx="100" cy="99" rx="22" ry="5" fill="#5D3000"/>
+  <!-- Dark coffee in tumbler -->
+  <path d="M76 106 Q76 140 100 140 Q124 140 124 106" fill="#4E2500" opacity="0.8"/>
+  <!-- Crema on top of tumbler -->
+  <ellipse cx="100" cy="99" rx="20" ry="4" fill="#D4870D" opacity="0.8"/>
+  <!-- Steam -->
+  <path d="M90 83 Q92 73 90 63" stroke="#CFD8DC" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <path d="M100 80 Q102 70 100 60" stroke="#CFD8DC" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <path d="M110 83 Q112 73 110 63" stroke="#CFD8DC" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <text x="100" y="192" text-anchor="middle" font-family="sans-serif" font-size="12" font-weight="bold" fill="#5D4037">Filter Coffee</text>
+</svg>

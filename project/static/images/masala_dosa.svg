@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <!-- Background -->
+  <circle cx="100" cy="100" r="95" fill="#FFF8E1"/>
+  <!-- Plate -->
+  <ellipse cx="100" cy="155" rx="82" ry="22" fill="#E8E8E8"/>
+  <ellipse cx="100" cy="152" rx="82" ry="22" fill="#F5F5F5"/>
+  <!-- Dosa body - large golden brown rolled shape -->
+  <path d="M30 140 Q35 90 70 85 Q110 80 155 90 Q165 110 155 135 Q110 145 30 140Z" fill="#D4870D"/>
+  <path d="M33 138 Q38 92 72 88 Q112 83 153 92 Q162 112 153 133 Q112 143 33 138Z" fill="#F0A830"/>
+  <path d="M36 136 Q42 96 74 91 Q114 87 151 95 Q158 114 151 131 Q114 140 36 136Z" fill="#FFC107"/>
+  <!-- Crispy edge highlight -->
+  <path d="M36 136 Q42 96 74 91" stroke="#E65100" stroke-width="2" fill="none" opacity="0.5"/>
+  <!-- Masala filling visible at opening -->
+  <ellipse cx="45" cy="128" rx="16" ry="12" fill="#FF7043"/>
+  <ellipse cx="45" cy="126" rx="14" ry="10" fill="#FF8A65"/>
+  <circle cx="42" cy="124" r="3" fill="#FFEB3B"/>
+  <circle cx="50" cy="126" r="2.5" fill="#4CAF50"/>
+  <circle cx="46" cy="130" r="2" fill="#FF5722"/>
+  <!-- Ghee shine -->
+  <ellipse cx="110" cy="108" rx="20" ry="8" fill="#FFE082" opacity="0.6"/>
+  <!-- Chutney side -->
+  <ellipse cx="168" cy="148" rx="16" ry="8" fill="#FFFDE7"/>
+  <ellipse cx="168" cy="145" rx="14" ry="6" fill="#F9FBE7"/>
+  <!-- Sambar -->
+  <ellipse cx="140" cy="150" rx="14" ry="7" fill="#FF7043"/>
+  <ellipse cx="140" cy="147" rx="12" ry="5" fill="#FF8A65"/>
+  <!-- Steam -->
+  <path d="M80 75 Q82 65 80 55" stroke="#BDBDBD" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <path d="M110 72 Q112 62 110 52" stroke="#BDBDBD" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <text x="100" y="184" text-anchor="middle" font-family="sans-serif" font-size="13" font-weight="bold" fill="#5D4037">Masala Dosa</text>
+</svg>

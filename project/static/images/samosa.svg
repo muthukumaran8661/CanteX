@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <!-- Background -->
+  <circle cx="100" cy="100" r="95" fill="#FFFDE7"/>
+  <!-- Plate -->
+  <ellipse cx="100" cy="163" rx="68" ry="14" fill="#EEEEEE"/>
+  <ellipse cx="100" cy="161" rx="68" ry="14" fill="#F5F5F5"/>
+  <!-- Samosa 1 (back) -->
+  <polygon points="100,70 155,148 45,148" fill="#C17D0A"/>
+  <polygon points="100,72 153,147 47,147" fill="#D4870D"/>
+  <polygon points="100,74 151,146 49,146" fill="#E8920A"/>
+  <!-- Left face -->
+  <polygon points="100,74 49,146 100,146" fill="#CD7F32"/>
+  <!-- Right face -->
+  <polygon points="100,74 151,146 100,146" fill="#F0A010"/>
+  <!-- Top ridge line -->
+  <line x1="100" y1="74" x2="100" y2="146" stroke="#8B5E00" stroke-width="1.5"/>
+  <!-- Texture (fold lines) -->
+  <line x1="100" y1="90" x2="70" y2="140" stroke="#BF7900" stroke-width="1" opacity="0.5"/>
+  <line x1="100" y1="90" x2="130" y2="140" stroke="#E09500" stroke-width="1" opacity="0.5"/>
+  <line x1="100" y1="108" x2="80" y2="140" stroke="#BF7900" stroke-width="1" opacity="0.4"/>
+  <line x1="100" y1="108" x2="120" y2="140" stroke="#E09500" stroke-width="1" opacity="0.4"/>
+  <!-- Golden spots (fried) -->
+  <circle cx="85" cy="118" r="4" fill="#8B5E00" opacity="0.4"/>
+  <circle cx="115" cy="114" r="3" fill="#FFD54F" opacity="0.5"/>
+  <circle cx="100" cy="100" r="3.5" fill="#FFE082" opacity="0.5"/>
+  <!-- Green chutney dip -->
+  <path d="M30 155 Q28 145 35 140 Q42 135 48 140 Q52 145 48 155 Q42 160 36 158 Z" fill="#388E3C"/>
+  <path d="M32 154 Q30 146 36 142 Q42 138 47 142 Q50 146 47 154 Q42 158 37 156 Z" fill="#4CAF50"/>
+  <ellipse cx="39" cy="141" rx="8" ry="4" fill="#66BB6A"/>
+  <!-- Tamarind chutney -->
+  <path d="M152 155 Q150 145 157 140 Q164 135 170 140 Q174 145 170 155 Q164 160 158 158 Z" fill="#8D4004"/>
+  <path d="M154 154 Q152 146 158 142 Q164 138 169 142 Q172 146 169 154 Q164 158 159 156 Z" fill="#BF6011"/>
+  <ellipse cx="162" cy="141" rx="7" ry="3.5" fill="#D4701A"/>
+  <!-- Steam -->
+  <path d="M88 60 Q90 50 88 40" stroke="#BDBDBD" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <path d="M112 60 Q114 50 112 40" stroke="#BDBDBD" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <text x="100" y="185" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="bold" fill="#5D4037">Samosa</text>
+</svg>

@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <!-- Background -->
+  <circle cx="100" cy="100" r="95" fill="#FFF3E0"/>
+  <!-- Plate -->
+  <ellipse cx="100" cy="158" rx="70" ry="16" fill="#EEEEEE"/>
+  <ellipse cx="100" cy="156" rx="70" ry="16" fill="#F5F5F5"/>
+  <!-- Vada - donut shape (annular) -->
+  <!-- Outer ring -->
+  <ellipse cx="100" cy="125" rx="52" ry="36" fill="#5D3A1A"/>
+  <ellipse cx="100" cy="122" rx="52" ry="36" fill="#6D4C2A"/>
+  <ellipse cx="100" cy="120" rx="52" ry="36" fill="#795030"/>
+  <!-- Top face of torus -->
+  <ellipse cx="100" cy="116" rx="50" ry="34" fill="#8B5E3C"/>
+  <!-- Golden-brown top surface -->
+  <ellipse cx="100" cy="112" rx="48" ry="32" fill="#A0522D"/>
+  <ellipse cx="100" cy="110" rx="46" ry="30" fill="#B5651D"/>
+  <ellipse cx="100" cy="108" rx="44" ry="28" fill="#CD7F32"/>
+  <!-- Crispy texture spots -->
+  <circle cx="70" cy="104" r="4" fill="#8B4513" opacity="0.6"/>
+  <circle cx="130" cy="106" r="3.5" fill="#6B3410" opacity="0.5"/>
+  <circle cx="100" cy="92" r="4" fill="#8B4513" opacity="0.6"/>
+  <circle cx="82" cy="118" r="3" fill="#6B3410" opacity="0.5"/>
+  <circle cx="118" cy="116" r="3" fill="#8B4513" opacity="0.5"/>
+  <!-- Hole in the middle -->
+  <ellipse cx="100" cy="107" rx="22" ry="14" fill="#6D4C2A"/>
+  <ellipse cx="100" cy="106" rx="20" ry="12" fill="#795030"/>
+  <ellipse cx="100" cy="105" rx="18" ry="11" fill="#8B5E3C"/>
+  <!-- Hole depth -->
+  <ellipse cx="100" cy="108" rx="18" ry="11" fill="#5D3A1A"/>
+  <!-- Fried surface highlight -->
+  <ellipse cx="88" cy="98" rx="14" ry="7" fill="#E8A020" opacity="0.4"/>
+  <!-- Coconut chutney -->
+  <ellipse cx="155" cy="148" rx="22" ry="9" fill="#FFFDE7"/>
+  <ellipse cx="155" cy="145" rx="20" ry="7" fill="#F9FBE7"/>
+  <circle cx="160" cy="143" r="2" fill="#4CAF50" opacity="0.6"/>
+  <!-- Sambar drizzle -->
+  <path d="M50 135 Q48 142 50 148" stroke="#FF7043" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <text x="100" y="182" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="bold" fill="#5D4037">Vada</text>
+</svg>

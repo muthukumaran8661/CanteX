@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <!-- Background circle -->
+  <circle cx="100" cy="100" r="95" fill="#FFF3E0"/>
+  <!-- Banana leaf plate -->
+  <ellipse cx="100" cy="145" rx="75" ry="20" fill="#4CAF50" opacity="0.8"/>
+  <ellipse cx="100" cy="142" rx="72" ry="18" fill="#66BB6A"/>
+  <!-- Sambar bowl -->
+  <ellipse cx="155" cy="125" rx="25" ry="12" fill="#E65100"/>
+  <ellipse cx="155" cy="120" rx="25" ry="12" fill="#FF7043"/>
+  <ellipse cx="155" cy="118" rx="23" ry="10" fill="#FF8A65"/>
+  <!-- Coconut chutney -->
+  <ellipse cx="45" cy="125" rx="22" ry="10" fill="#F5F5F5"/>
+  <ellipse cx="45" cy="122" rx="22" ry="10" fill="#FFFDE7"/>
+  <!-- Idli 1 -->
+  <ellipse cx="85" cy="125" rx="30" ry="20" fill="#F5F5F5"/>
+  <ellipse cx="85" cy="118" rx="30" ry="20" fill="#FFFFFF"/>
+  <ellipse cx="85" cy="116" rx="28" ry="18" fill="#FAFAFA"/>
+  <!-- Idli 2 -->
+  <ellipse cx="115" cy="118" rx="28" ry="18" fill="#F5F5F5"/>
+  <ellipse cx="115" cy="112" rx="28" ry="18" fill="#FFFFFF"/>
+  <ellipse cx="115" cy="110" rx="26" ry="16" fill="#FAFAFA"/>
+  <!-- Mustard seeds on idli -->
+  <circle cx="80" cy="113" r="2" fill="#FFC107"/>
+  <circle cx="90" cy="109" r="2" fill="#FF5722"/>
+  <circle cx="85" cy="106" r="1.5" fill="#4CAF50"/>
+  <!-- Steam -->
+  <path d="M70 90 Q72 80 70 70" stroke="#BDBDBD" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <path d="M100 85 Q102 75 100 65" stroke="#BDBDBD" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <!-- Title area -->
+  <text x="100" y="175" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="bold" fill="#5D4037">Idli</text>
+</svg>

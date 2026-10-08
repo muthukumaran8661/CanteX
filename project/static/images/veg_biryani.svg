@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <!-- Background -->
+  <circle cx="100" cy="100" r="95" fill="#FFF8E1"/>
+  <!-- Pot shadow -->
+  <ellipse cx="100" cy="168" rx="62" ry="14" fill="#D7CCC8" opacity="0.7"/>
+  <!-- Pot/Handi body -->
+  <path d="M38 125 Q38 168 100 168 Q162 168 162 125 Z" fill="#6D4C41"/>
+  <path d="M40 125 Q40 166 100 166 Q160 166 160 125 Z" fill="#795548"/>
+  <path d="M42 125 Q42 164 100 164 Q158 164 158 125 Z" fill="#8D6E63"/>
+  <!-- Pot rim -->
+  <ellipse cx="100" cy="125" rx="62" ry="14" fill="#5D4037"/>
+  <ellipse cx="100" cy="123" rx="62" ry="14" fill="#6D4C41"/>
+  <!-- Biryani rice - top view, colorful -->
+  <ellipse cx="100" cy="123" rx="58" ry="12" fill="#E65100"/>
+  <!-- Rice layers - orange, yellow, white -->
+  <ellipse cx="100" cy="116" rx="56" ry="18" fill="#FF8F00"/>
+  <ellipse cx="100" cy="112" rx="54" ry="16" fill="#FFA000"/>
+  <ellipse cx="100" cy="108" rx="52" ry="14" fill="#FFCA28"/>
+  <!-- Rice grains pattern -->
+  <rect x="72" y="102" width="8" height="3" rx="1.5" fill="#FFFDE7" transform="rotate(-20,76,103)"/>
+  <rect x="90" y="98" width="8" height="3" rx="1.5" fill="#FFFDE7" transform="rotate(10,94,99)"/>
+  <rect x="108" y="101" width="8" height="3" rx="1.5" fill="#FFFDE7" transform="rotate(-15,112,102)"/>
+  <rect x="82" y="108" width="7" height="3" rx="1.5" fill="#FFFDE7" transform="rotate(25,85,109)"/>
+  <rect x="100" y="106" width="7" height="3" rx="1.5" fill="#FFFDE7" transform="rotate(-5,103,107)"/>
+  <rect x="118" y="108" width="7" height="3" rx="1.5" fill="#FFFDE7" transform="rotate(30,121,109)"/>
+  <!-- Fried onions (brown slices) -->
+  <path d="M78 106 Q82 103 86 107" stroke="#8B4513" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <path d="M112 104 Q116 101 120 105" stroke="#8B4513" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <!-- Saffron color patches -->
+  <circle cx="95" cy="106" r="5" fill="#FF6D00" opacity="0.6"/>
+  <circle cx="112" cy="110" r="4" fill="#FF6D00" opacity="0.5"/>
+  <!-- Mint leaves (green) -->
+  <ellipse cx="85" cy="103" rx="4" ry="2" fill="#4CAF50" transform="rotate(-30,85,103)"/>
+  <ellipse cx="118" cy="106" rx="4" ry="2" fill="#4CAF50" transform="rotate(20,118,106)"/>
+  <!-- Whole spices -->
+  <circle cx="100" cy="115" r="2.5" fill="#5D4037"/>
+  <circle cx="88" cy="112" r="2" fill="#4E342E"/>
+  <!-- Pot handles -->
+  <path d="M30 130 Q20 120 30 110" stroke="#5D4037" stroke-width="6" fill="none" stroke-linecap="round"/>
+  <path d="M170 130 Q180 120 170 110" stroke="#5D4037" stroke-width="6" fill="none" stroke-linecap="round"/>
+  <!-- Steam -->
+  <path d="M80 88 Q83 77 80 66" stroke="#CFD8DC" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <path d="M100 84 Q103 73 100 62" stroke="#CFD8DC" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <path d="M120 88 Q123 77 120 66" stroke="#CFD8DC" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <text x="100" y="188" text-anchor="middle" font-family="sans-serif" font-size="13" font-weight="bold" fill="#5D4037">Veg Biryani</text>
+</svg>

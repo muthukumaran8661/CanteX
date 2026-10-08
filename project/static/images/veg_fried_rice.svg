@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <!-- Background -->
+  <circle cx="100" cy="100" r="95" fill="#F1F8E9"/>
+  <!-- Plate -->
+  <ellipse cx="100" cy="160" rx="70" ry="15" fill="#EEEEEE"/>
+  <ellipse cx="100" cy="158" rx="70" ry="15" fill="#F5F5F5"/>
+  <!-- Wok/bowl shape -->
+  <path d="M42 120 Q42 162 100 162 Q158 162 158 120 Z" fill="#5D4037"/>
+  <path d="M44 120 Q44 160 100 160 Q156 160 156 120 Z" fill="#795548"/>
+  <!-- Rice base -->
+  <ellipse cx="100" cy="120" rx="58" ry="12" fill="#558B2F"/>
+  <ellipse cx="100" cy="114" rx="56" ry="16" fill="#689F38"/>
+  <ellipse cx="100" cy="110" rx="54" ry="14" fill="#8BC34A"/>
+  <!-- Egg pieces (yellow scrambled) -->
+  <path d="M68 108 Q72 104 78 108 Q76 114 70 114 Z" fill="#FDD835"/>
+  <path d="M120 106 Q124 102 130 106 Q128 112 122 112 Z" fill="#FFEE58"/>
+  <!-- Colorful vegetables -->
+  <!-- Carrot orange strips -->
+  <rect x="84" y="100" width="3" height="12" rx="1.5" fill="#FF7043" transform="rotate(-10,85,106)"/>
+  <rect x="92" y="98" width="3" height="12" rx="1.5" fill="#FF5722" transform="rotate(5,93,104)"/>
+  <!-- Green beans -->
+  <rect x="78" y="104" width="2.5" height="10" rx="1.2" fill="#4CAF50" transform="rotate(20,79,109)"/>
+  <rect x="105" y="100" width="2.5" height="10" rx="1.2" fill="#388E3C" transform="rotate(-15,106,105)"/>
+  <!-- Peas -->
+  <circle cx="95" cy="104" r="3.5" fill="#66BB6A"/>
+  <circle cx="110" cy="108" r="3" fill="#81C784"/>
+  <circle cx="88" cy="112" r="3" fill="#4CAF50"/>
+  <!-- Corn kernels -->
+  <circle cx="100" cy="106" r="3" fill="#FFC107"/>
+  <circle cx="112" cy="103" r="2.5" fill="#FFD54F"/>
+  <!-- Capsicum pieces -->
+  <path d="M115 112 Q118 108 122 112 Q122 116 118 116 Z" fill="#F44336"/>
+  <path d="M75 112 Q78 108 82 112 Q82 116 78 116 Z" fill="#4CAF50"/>
+  <!-- Rice grains white -->
+  <circle cx="100" cy="110" r="2" fill="#FFFDE7"/>
+  <circle cx="93" cy="107" r="1.5" fill="#FFFDE7"/>
+  <circle cx="107" cy="109" r="1.5" fill="#FFFDE7"/>
+  <!-- Soy sauce dark spots -->
+  <circle cx="95" cy="115" r="2" fill="#4E342E" opacity="0.6"/>
+  <circle cx="106" cy="114" r="1.5" fill="#3E2723" opacity="0.5"/>
+  <!-- Chopstick/spoon handle -->
+  <rect x="148" y="90" width="8" height="60" rx="4" fill="#BCAAA4" transform="rotate(-20,152,120)"/>
+  <text x="100" y="183" text-anchor="middle" font-family="sans-serif" font-size="12" font-weight="bold" fill="#5D4037">Veg Fried Rice</text>
+</svg>

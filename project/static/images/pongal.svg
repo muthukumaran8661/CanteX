@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <!-- Background -->
+  <circle cx="100" cy="100" r="95" fill="#FFFDE7"/>
+  <!-- Bowl shadow -->
+  <ellipse cx="100" cy="162" rx="60" ry="12" fill="#E0E0E0" opacity="0.6"/>
+  <!-- Bowl body -->
+  <path d="M40 120 Q40 165 100 165 Q160 165 160 120 Z" fill="#8D6E63"/>
+  <path d="M42 120 Q42 163 100 163 Q158 163 158 120 Z" fill="#A1887F"/>
+  <path d="M44 120 Q44 161 100 161 Q156 161 156 120 Z" fill="#BCAAA4"/>
+  <!-- Bowl rim -->
+  <ellipse cx="100" cy="120" rx="60" ry="12" fill="#6D4C41"/>
+  <ellipse cx="100" cy="118" rx="60" ry="12" fill="#795548"/>
+  <!-- Pongal rice - creamy yellow -->
+  <ellipse cx="100" cy="118" rx="56" ry="10" fill="#F9A825"/>
+  <ellipse cx="100" cy="112" rx="54" ry="18" fill="#FBC02D"/>
+  <ellipse cx="100" cy="108" rx="52" ry="16" fill="#FFCA28"/>
+  <!-- Rice texture dots -->
+  <circle cx="80" cy="108" r="3" fill="#FFF9C4"/>
+  <circle cx="95" cy="104" r="3" fill="#FFF9C4"/>
+  <circle cx="112" cy="107" r="3" fill="#FFF9C4"/>
+  <circle cx="88" cy="114" r="2.5" fill="#FFF176"/>
+  <circle cx="106" cy="112" r="2.5" fill="#FFF176"/>
+  <!-- Cashews -->
+  <path d="M75 106 Q80 102 85 106 Q83 110 78 110 Z" fill="#FFE082"/>
+  <path d="M115 109 Q120 105 125 109 Q123 113 118 113 Z" fill="#FFE082"/>
+  <!-- Black pepper -->
+  <circle cx="95" cy="110" r="2" fill="#212121"/>
+  <circle cx="108" cy="106" r="2" fill="#212121"/>
+  <circle cx="100" cy="115" r="1.5" fill="#212121"/>
+  <!-- Ghee pool on top -->
+  <ellipse cx="100" cy="106" rx="20" ry="8" fill="#FFE57F" opacity="0.7"/>
+  <!-- Curry leaves -->
+  <path d="M90 100 Q92 96 94 100" stroke="#388E3C" stroke-width="2" fill="none"/>
+  <path d="M100 98 Q102 94 104 98" stroke="#388E3C" stroke-width="2" fill="none"/>
+  <!-- Steam -->
+  <path d="M75 88 Q77 78 75 68" stroke="#B0BEC5" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <path d="M100 84 Q102 74 100 64" stroke="#B0BEC5" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <path d="M125 88 Q127 78 125 68" stroke="#B0BEC5" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <text x="100" y="186" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="bold" fill="#5D4037">Pongal</text>
+</svg>
