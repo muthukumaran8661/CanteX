@@ -11,6 +11,7 @@
   <title>SMART CANTEEN – Fresh. Fast. Traditional.</title>
   <meta name="description" content="Premium fast-food restaurant ordering web application for Smart Canteen. Authentic Tamil Nadu dishes, instant live tokens, and zero queue waiting." />
   <link rel="manifest" href="/manifest.json" />
+  <link rel="icon" type="image/png" href="/static/icon-192.png" />
   <link rel="apple-touch-icon" sizes="192x192" href="/static/icon-192.png" />
   <link rel="apple-touch-icon" sizes="512x512" href="/static/icon-512.png" />
   <link rel="stylesheet" href="/static/style.css" />
@@ -25,7 +26,9 @@
 
     <!-- Logo / Brand -->
     <a class="brand-link" href="#home" onclick="navTo('home'); return false;">
-      <div class="brand-icon-box">🍽️</div>
+      <div class="brand-icon-box">
+        <img src="/static/icon-192.png" alt="Smart Canteen Logo" class="brand-logo-img" />
+      </div>
       <div class="brand-text-wrap">
         <span class="brand-title">SMART CANTEEN</span>
         <span class="brand-subtitle">Fresh • Fast • Traditional</span>
@@ -120,7 +123,10 @@
 <div class="mobile-drawer-overlay" id="drawerOverlay" onclick="toggleMobileDrawer()"></div>
 <div class="mobile-drawer" id="mobileDrawer">
   <div class="drawer-header">
-    <div class="brand-title" style="font-size:1.2rem;">🍽️ SMART CANTEEN</div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <img src="/static/icon-192.png" alt="Smart Canteen" style="width:34px;height:34px;border-radius:10px;box-shadow:0 2px 8px rgba(200,16,46,0.25);" />
+      <div class="brand-title" style="font-size:1.15rem;">SMART CANTEEN</div>
+    </div>
     <button class="drawer-close-btn" onclick="toggleMobileDrawer()">✕</button>
   </div>
   <div class="drawer-nav">
@@ -682,7 +688,9 @@
             <div class="pay-opt-radio">
               <span class="radio-inner"></span>
             </div>
-            <div class="pay-opt-icon gpay-icon">🟢</div>
+            <div class="pay-opt-icon gpay-icon">
+              <img src="/static/images/gpay_logo.svg" alt="Google Pay" class="pay-logo-img gpay-logo" />
+            </div>
             <div class="pay-opt-info">
               <div class="pay-opt-title">Google Pay</div>
               <div class="pay-opt-sub">Pay securely using Google Pay UPI</div>
@@ -694,7 +702,9 @@
             <div class="pay-opt-radio">
               <span class="radio-inner"></span>
             </div>
-            <div class="pay-opt-icon phonepe-icon">🟣</div>
+            <div class="pay-opt-icon phonepe-icon">
+              <img src="/static/images/phonepe_logo.svg" alt="PhonePe" class="pay-logo-img phonepe-logo" />
+            </div>
             <div class="pay-opt-info">
               <div class="pay-opt-title">PhonePe</div>
               <div class="pay-opt-sub">Pay securely using PhonePe app</div>
@@ -706,7 +716,9 @@
             <div class="pay-opt-radio">
               <span class="radio-inner"></span>
             </div>
-            <div class="pay-opt-icon upi-icon">🟡</div>
+            <div class="pay-opt-icon upi-icon">
+              <img src="/static/images/upi_logo.svg" alt="UPI" class="pay-logo-img upi-logo" />
+            </div>
             <div class="pay-opt-info">
               <div class="pay-opt-title">UPI Application / ID</div>
               <div class="pay-opt-sub">Pay using Paytm, BHIM, or any UPI app</div>
@@ -990,7 +1002,10 @@
 <footer class="app-footer">
   <div class="footer-container">
     <div class="footer-col brand-col">
-      <div class="footer-brand">🍽️ SMART CANTEEN</div>
+      <div class="footer-brand" style="display:flex;align-items:center;gap:10px;">
+        <img src="/static/icon-192.png" alt="Smart Canteen" style="width:34px;height:34px;border-radius:10px;" />
+        <span>SMART CANTEEN</span>
+      </div>
       <p class="footer-tagline">"Fresh. Fast. Traditional."</p>
       <p class="footer-desc">
         A premium digital canteen ordering and queue token system for college campuses. Skip the line, enjoy authentic Tamil Nadu flavors.

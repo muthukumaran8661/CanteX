@@ -8,8 +8,8 @@
    - /static/data/* or any dynamic responses
    ==================================================================== */
 
-const CACHE_NAME = 'smart-canteen-v1';
-const CACHE_VERSION = 1;
+const CACHE_NAME = 'smart-canteen-v2';
+const CACHE_VERSION = 2;
 
 // Only cache safe static assets
 const STATIC_ASSETS = [
@@ -17,6 +17,10 @@ const STATIC_ASSETS = [
   '/static/style.css',
   '/static/app.js',
   '/static/manifest.json',
+  '/static/images/gpay_logo.svg',
+  '/static/images/phonepe_logo.svg',
+  '/static/images/upi_logo.svg',
+  '/static/images/app_logo.svg',
   '/static/images/idli.jpg',
   '/static/images/masala_dosa.jpg',
   '/static/images/pongal.jpg',

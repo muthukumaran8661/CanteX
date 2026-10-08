@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 145 42" width="145" height="42" fill="none">
+  <!-- Slanted "UPI" lettering -->
+  <g fill="#2e383f" transform="skewX(-16)">
+    <!-- U -->
+    <path d="M 12 6 L 16.5 6 L 16.5 19 C 16.5 21 17.5 22.2 19.5 22.2 C 21.5 22.2 22.5 21 22.5 19 L 22.5 6 L 27 6 L 27 19.2 C 27 23.5 24 25.8 19.5 25.8 C 15 25.8 12 23.5 12 19.2 Z"/>
+    <!-- P -->
+    <path d="M 32 6 L 41.5 6 C 45 6 47.5 7.8 47.5 11.5 C 47.5 15.2 45 17 41.5 17 L 36.5 17 L 36.5 25.5 L 32 25.5 Z M 36.5 9.8 L 36.5 13.2 L 41 13.2 C 42.4 13.2 43 12.5 43 11.5 C 43 10.5 42.4 9.8 41 9.8 Z"/>
+    <!-- I -->
+    <path d="M 52.5 6 L 57 6 L 57 25.5 L 52.5 25.5 Z"/>
+    <!-- Chevrons / Triangles -->
+    <!-- Green chevron -->
+    <polygon points="62.5,6 68.5,15.7 62.5,25.5 66.5,25.5 72.5,15.7 66.5,6" fill="#097939"/>
+    <!-- Orange chevron -->
+    <polygon points="69.5,6 75.5,15.7 69.5,25.5 73.5,25.5 79.5,15.7 73.5,6" fill="#ed7524"/>
+  </g>
+  <!-- Subtitle: UNIFIED PAYMENTS INTERFACE -->
+  <text x="4" y="37" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="7.5" font-weight="700" fill="#2e383f" letter-spacing="0.6">UNIFIED PAYMENTS INTERFACE</text>
+</svg>

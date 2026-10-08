@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 40" width="120" height="40" fill="none">
+  <!-- Google "G" -->
+  <g transform="translate(4, 5)">
+    <path d="M 28.5 15.3 C 28.5 14.2 28.4 13.2 28.2 12.2 L 15 12.2 L 15 17.8 L 22.6 17.8 C 22.3 19.5 21.2 21.1 19.6 22.1 L 19.6 25.8 L 24.3 25.8 C 27.1 23.2 28.5 19.6 28.5 15.3 Z" fill="#4285F4"/>
+    <path d="M 15 29 C 18.9 29 22.2 27.7 24.5 25.6 L 19.8 21.9 C 18.5 22.8 16.9 23.3 15 23.3 C 11.2 23.3 8 20.7 6.8 17.2 L 2 17.2 L 2 21 C 4.4 25.8 9.3 29 15 29 Z" fill="#34A853"/>
+    <path d="M 6.8 17.2 C 6.5 16.3 6.3 15.3 6.3 14.3 C 6.3 13.3 6.5 12.3 6.8 11.4 L 6.8 7.6 L 2 7.6 C 0.7 10.2 0 12.2 0 14.3 C 0 16.4 0.7 18.4 2 21 L 6.8 17.2 Z" fill="#FBBC05"/>
+    <path d="M 15 5.3 C 17.1 5.3 19 6 20.5 7.4 L 24.6 3.3 C 22.1 1.1 18.8 0 15 0 C 9.3 0 4.4 3.2 2 8 L 6.8 11.8 C 8 8.3 11.2 5.3 15 5.3 Z" fill="#EA4335"/>
+  </g>
+  <!-- "Pay" text -->
+  <text x="42" y="27" font-family="-apple-system, BlinkMacSystemFont, 'Google Sans', 'Segoe UI', Roboto, sans-serif" font-size="22" font-weight="600" fill="#3c4043" letter-spacing="-0.3">Pay</text>
+</svg>
