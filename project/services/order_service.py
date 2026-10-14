@@ -41,6 +41,8 @@ from core.scheduler import (
 )
 from services.payment_adapter import PaymentAdapter
 from services.event_broker import EventBroker
+from services.recommendation_service import RecommendationService
+
 
 
 def _now_iso() -> str:
@@ -244,6 +246,7 @@ class OrderService:
                     })
 
                 conn.execute("COMMIT")
+                RecommendationService.invalidate_cache()
 
                 # Step 7: Broadcast real-time live events
                 order_payload = {
@@ -340,6 +343,7 @@ class OrderService:
                 )
 
                 conn.execute("COMMIT")
+                RecommendationService.invalidate_cache()
 
                 # Broadcast live updates
                 EventBroker.publish("order_cancelled", {
@@ -562,6 +566,7 @@ class OrderService:
                         """, (STATUS_CANCELLED, now_str, old_task["id"]))
 
                 conn.execute("COMMIT")
+                RecommendationService.invalidate_cache()
 
                 # Broadcast live updates
                 EventBroker.publish("order_edited", {

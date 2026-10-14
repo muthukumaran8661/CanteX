@@ -357,6 +357,11 @@ def reset_menu_item_stock(item_id: int, new_stock: int):
                 VALUES (?, ?, 'STAFF_MANUAL_RESET', datetime('now'))
             """, (item_id, new_stock))
             conn.execute("COMMIT")
+            try:
+                from services.recommendation_service import RecommendationService
+                RecommendationService.invalidate_cache()
+            except Exception:
+                pass
         except Exception:
             conn.execute("ROLLBACK")
             raise

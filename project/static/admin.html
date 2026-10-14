@@ -900,6 +900,9 @@
       <a class="sidebar-link" onclick="switchSection('livequeues', this)">
         <span class="link-icon">⚡</span> Live Queues
       </a>
+      <a class="sidebar-link" onclick="switchSection('recommendations', this)">
+        <span class="link-icon">✨</span> Recommendations
+      </a>
 
       <div class="menu-heading">Administration</div>
       <a class="sidebar-link" onclick="switchSection('users', this)">
@@ -1382,6 +1385,164 @@
       </section>
 
       <!-- ══════════════════════════════════════════════════════════
+           SECTION: AI RECOMMENDATIONS & DATA INSIGHTS
+      ══════════════════════════════════════════════════════════ -->
+      <section class="admin-section" id="sec-recommendations">
+        <div class="admin-card-panel">
+          <div class="section-title-row" style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:20px;">
+            <div>
+              <h2><span>✨</span> AI RECOMMENDATION INTELLIGENCE</h2>
+              <p class="section-subtitle">Item-to-Item Collaborative Filtering, Co-Occurrence Association &amp; Personalization Analytics</p>
+            </div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+              <button onclick="seedRecommendationsData()" style="background:#ea580c;color:#fff;border:none;padding:9px 15px;border-radius:8px;font-weight:700;font-size:0.85rem;cursor:pointer;">
+                🌱 Seed 25 Demo Orders
+              </button>
+              <button onclick="evaluateOfflineModel()" style="background:#7c3aed;color:#fff;border:none;padding:9px 15px;border-radius:8px;font-weight:700;font-size:0.85rem;cursor:pointer;">
+                🎯 Evaluate Precision@K
+              </button>
+              <button onclick="loadRecommendationsAdminData()" style="background:#0f172a;color:#fff;border:none;padding:9px 15px;border-radius:8px;font-weight:700;font-size:0.85rem;cursor:pointer;">
+                🔄 Refresh
+              </button>
+            </div>
+          </div>
+
+          <!-- Recommendation KPI Metrics Cards -->
+          <div class="kpi-grid" style="margin-bottom:28px;">
+            <div class="kpi-card red">
+              <div class="kpi-top">
+                <span class="kpi-label">Eligible Orders</span>
+                <div class="kpi-icon-box">📦</div>
+              </div>
+              <div class="kpi-val" id="recStatEligibleOrders">0</div>
+              <div class="kpi-sub">Measured non-cancelled purchases</div>
+            </div>
+
+            <div class="kpi-card orange">
+              <div class="kpi-top">
+                <span class="kpi-label">Items with Similarity</span>
+                <div class="kpi-icon-box">🔗</div>
+              </div>
+              <div class="kpi-val" id="recStatItemsWithSim">0</div>
+              <div class="kpi-sub">Menu items with CF neighbors</div>
+            </div>
+
+            <div class="kpi-card green">
+              <div class="kpi-top">
+                <span class="kpi-label">Requests Served</span>
+                <div class="kpi-icon-box">📡</div>
+              </div>
+              <div class="kpi-val" id="recStatReqsServed">0</div>
+              <div class="kpi-sub">Total recommendation API calls</div>
+            </div>
+
+            <div class="kpi-card blue">
+              <div class="kpi-top">
+                <span class="kpi-label">Cold-Start Fallbacks</span>
+                <div class="kpi-icon-box">❄️</div>
+              </div>
+              <div class="kpi-val" id="recStatColdStartUsage">0</div>
+              <div class="kpi-sub" id="recStatColdStartSub">0% of total requests</div>
+            </div>
+          </div>
+
+          <!-- Offline Evaluation Metrics Banner -->
+          <div id="recEvalResultsBox" style="background:#f5f3ff;border:1.5px solid #ddd6fe;border-radius:14px;padding:16px 20px;margin-bottom:28px;display:none;">
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+              <div>
+                <strong style="color:#6d28d9;font-size:1.05rem;">🎯 Offline Ranking Evaluation (Leave-One-Out Validation)</strong>
+                <p style="margin:4px 0 0;color:#5b21b6;font-size:0.88rem;" id="recEvalMsg">Measuring Precision@K and Recall@K on multi-item student orders.</p>
+              </div>
+              <div style="display:flex;gap:20px;">
+                <div style="text-align:center;">
+                  <span style="font-size:0.75rem;font-weight:800;color:#7c3aed;text-transform:uppercase;">Precision@3</span>
+                  <div style="font-size:1.4rem;font-weight:900;color:#5b21b6;" id="recEvalPrecision">0.0</div>
+                </div>
+                <div style="text-align:center;">
+                  <span style="font-size:0.75rem;font-weight:800;color:#7c3aed;text-transform:uppercase;">Recall@3</span>
+                  <div style="font-size:1.4rem;font-weight:900;color:#5b21b6;" id="recEvalRecall">0.0</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Table 1: Most Frequently Ordered Item Pairs -->
+          <div style="margin-bottom:32px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+              <h3 style="margin:0;font-size:1.1rem;color:#0f172a;">🤝 Most Frequently Ordered Item Pairs</h3>
+              <small style="color:#64748b;font-weight:700;">Calculated from actual completed order combinations</small>
+            </div>
+            <div class="table-responsive">
+              <table class="admin-data-table">
+                <thead>
+                  <tr>
+                    <th>Item #1</th>
+                    <th>Item #2</th>
+                    <th>Ordered Together</th>
+                    <th>Order Coverage (%)</th>
+                    <th>Co-Occurrence Strength</th>
+                  </tr>
+                </thead>
+                <tbody id="recPairsTableBody">
+                  <tr><td colspan="5" style="text-align:center;padding:20px;color:#94a3b8;">Loading item pairs...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Table 2: Most Frequently Recommended Items -->
+          <div style="margin-bottom:32px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+              <h3 style="margin:0;font-size:1.1rem;color:#0f172a;">🌟 Most Frequently Recommended Dishes</h3>
+              <small style="color:#64748b;font-weight:700;">Real measured delivery counts in student feeds</small>
+            </div>
+            <div class="table-responsive">
+              <table class="admin-data-table">
+                <thead>
+                  <tr>
+                    <th>Food Item</th>
+                    <th>Category</th>
+                    <th>Times Served in Recommendations</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="recItemsTableBody">
+                  <tr><td colspan="4" style="text-align:center;padding:20px;color:#94a3b8;">Loading recommended items...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Algorithm Transparency & Weight Documentation -->
+          <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:14px;padding:20px;">
+            <h4 style="margin:0 0 10px 0;font-size:1rem;color:#0f172a;">📐 Scoring Formula &amp; Mathematical Transparency</h4>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:14px;margin-bottom:12px;">
+              <div style="background:#fff;padding:12px 14px;border-radius:10px;border:1px solid #e2e8f0;">
+                <strong style="color:#b91c1c;">Weight 1: Item Similarity (50%)</strong>
+                <p style="margin:4px 0 0;font-size:0.8rem;color:#64748b;">Cosine similarity of user interaction vectors with log quantity scaling.</p>
+              </div>
+              <div style="background:#fff;padding:12px 14px;border-radius:10px;border:1px solid #e2e8f0;">
+                <strong style="color:#ea580c;">Weight 2: Order Co-Occurrence (20%)</strong>
+                <p style="margin:4px 0 0;font-size:0.8rem;color:#64748b;">Direct association with items present in the student's recent order.</p>
+              </div>
+              <div style="background:#fff;padding:12px 14px;border-radius:10px;border:1px solid #e2e8f0;">
+                <strong style="color:#2563eb;">Weight 3: Recency Alignment (15%)</strong>
+                <p style="margin:4px 0 0;font-size:0.8rem;color:#64748b;">Exponential time decay (λ=7 days) to favor active food tastes.</p>
+              </div>
+              <div style="background:#fff;padding:12px 14px;border-radius:10px;border:1px solid #e2e8f0;">
+                <strong style="color:#059669;">Weight 4: Canteen Popularity (15%)</strong>
+                <p style="margin:4px 0 0;font-size:0.8rem;color:#64748b;">Normalized frequency across valid orders (never overpowers personalization).</p>
+              </div>
+            </div>
+            <p style="margin:0;font-size:0.78rem;color:#94a3b8;">
+              ℹ️ <strong>Data Quality Invariant:</strong> Cancelled orders and failed transactions are strictly excluded from similarity matrices. Sold-out dishes (stock=0) are suppressed across all sections.
+            </p>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════════════════════
            SECTION 9: SETTINGS
       ══════════════════════════════════════════════════════════ -->
       <section class="admin-section" id="sec-settings">
@@ -1446,6 +1607,7 @@
         users: 'Students & Users',
         staff: 'Staff Management',
         reports: 'Reports & Analytics',
+        recommendations: 'AI Recommendation Intelligence',
         settings: 'System Settings'
       };
       document.getElementById('topbarTitle').textContent = titles[secId] || 'Admin Dashboard';
@@ -1456,6 +1618,7 @@
       if (secId === 'menu') loadInventoryTable();
       if (secId === 'tokenboard') loadLiveTokenBoard();
       if (secId === 'livequeues') loadStationQueuesView();
+      if (secId === 'recommendations') loadRecommendationsAdminData();
       if (secId === 'users') loadUsersTable();
       if (secId === 'staff') loadStaffTable();
 
@@ -1922,6 +2085,97 @@
         `).join('');
       } catch (err) {
         tbody.innerHTML = '<tr><td colspan="8" style="color:#b91c1c;padding:20px;">Failed to load staff.</td></tr>';
+      }
+    }
+
+    // ── AI Recommendation Intelligence ──
+    async function loadRecommendationsAdminData() {
+      try {
+        const resp = await fetch('/api/admin/recommendations/insights');
+        if (!resp.ok) return;
+        const data = await resp.json();
+        const m = data.measured_analytics || {};
+
+        document.getElementById('recStatEligibleOrders').textContent = m.eligible_orders_count || 0;
+        document.getElementById('recStatItemsWithSim').textContent = m.items_with_similarity_data || 0;
+        document.getElementById('recStatReqsServed').textContent = m.recommendation_requests_served || 0;
+        document.getElementById('recStatColdStartUsage').textContent = m.cold_start_fallback_usage || 0;
+        document.getElementById('recStatColdStartSub').textContent = (m.cold_start_fallback_percentage || 0) + '% of total requests';
+
+        // Render Frequently Ordered Pairs
+        const pairsTbody = document.getElementById('recPairsTableBody');
+        const pairs = data.most_frequently_ordered_pairs || [];
+        if (pairs.length === 0) {
+          pairsTbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:24px;color:#64748b;">No paired orders recorded yet. Seed demo orders or place multi-item orders.</td></tr>';
+        } else {
+          pairsTbody.innerHTML = pairs.map(p => {
+            let strengthBadge = '<span class="status-badge status-preparing">STRONG PAIR</span>';
+            if (p.cooccurrence_count >= 5) strengthBadge = '<span class="status-badge status-ready">TOP COMBO</span>';
+            else if (p.cooccurrence_count === 1) strengthBadge = '<span class="status-badge status-waiting">MODERATE</span>';
+
+            return `
+              <tr>
+                <td><strong>${p.item_1_name}</strong></td>
+                <td><strong>${p.item_2_name}</strong></td>
+                <td><strong style="color:#b91c1c;font-size:1.05rem;">${p.cooccurrence_count}</strong> times</td>
+                <td><strong style="color:#059669;">${p.order_percentage}%</strong></td>
+                <td>${strengthBadge}</td>
+              </tr>
+            `;
+          }).join('');
+        }
+
+        // Render Frequently Recommended Items
+        const itemsTbody = document.getElementById('recItemsTableBody');
+        const recItems = data.most_frequently_recommended_items || [];
+        if (recItems.length === 0) {
+          itemsTbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:24px;color:#64748b;">No items recommended yet. Browse the student portal to generate recommendation logs.</td></tr>';
+        } else {
+          itemsTbody.innerHTML = recItems.map(it => `
+            <tr>
+              <td><strong>${it.item_name}</strong></td>
+              <td><span style="background:#f1f5f9;padding:3px 8px;border-radius:4px;font-size:0.8rem;">${it.category}</span></td>
+              <td><strong style="color:#2563eb;font-size:1.05rem;">${it.times_recommended}</strong> times served</td>
+              <td><span class="status-badge status-active">ACTIVE IN ENGINE</span></td>
+            </tr>
+          `).join('');
+        }
+      } catch (err) {
+        console.error('Failed to load recommendation admin data:', err);
+      }
+    }
+
+    async function seedRecommendationsData() {
+      if (!confirm('Seed 25 authentic historical orders into the canteen database? This will enrich the collaborative filtering model.')) return;
+      try {
+        const resp = await fetch('/api/admin/recommendations/seed', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ count: 25, force: true }),
+        });
+        const res = await resp.json();
+        alert(res.message || 'Seeded successfully!');
+        loadRecommendationsAdminData();
+        loadDashboardData();
+      } catch (err) {
+        alert('Error seeding recommendation orders.');
+      }
+    }
+
+    async function evaluateOfflineModel() {
+      const box = document.getElementById('recEvalResultsBox');
+      const pEl = document.getElementById('recEvalPrecision');
+      const rEl = document.getElementById('recEvalRecall');
+      const msgEl = document.getElementById('recEvalMsg');
+      try {
+        const resp = await fetch('/api/admin/recommendations/evaluate?k=3');
+        const res = await resp.json();
+        if (box) box.style.display = 'block';
+        if (pEl) pEl.textContent = (res.precision_at_k * 100).toFixed(1) + '%';
+        if (rEl) rEl.textContent = (res.recall_at_k * 100).toFixed(1) + '%';
+        if (msgEl) msgEl.textContent = `${res.message} (Evaluated ${res.evaluated_users} multi-item users)`;
+      } catch (err) {
+        alert('Error evaluating offline model.');
       }
     }
 

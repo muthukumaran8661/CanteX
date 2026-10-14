@@ -1,9 +1,4 @@
-"""
-core/token_gen.py
-=================
-Thread-safe, deterministic token generator for canteen orders.
-Pure Python standard library only.
-"""
+
 
 import threading
 import sys
@@ -18,14 +13,7 @@ from config import TOKEN_PREFIX, TOKEN_PADDING
 
 
 class TokenGenerator:
-    """
-    Generates sequential, zero-padded, unique tokens.
-    Format: <TOKEN_PREFIX><zero-padded counter>
-    Example: "T-001", "T-002", ..., "T-999", "T-1000"
-
-    Thread-safe: uses threading.Lock to serialize counter increments across
-    concurrent checkout requests.
-    """
+   
 
     def __init__(self, prefix: str = None, padding: int = None, start: int = 1):
         self._prefix = prefix if prefix is not None else TOKEN_PREFIX
@@ -34,10 +22,7 @@ class TokenGenerator:
         self._lock = threading.Lock()
 
     def next_token(self) -> str:
-        """
-        Generate and return the next unique token atomically.
-        Thread-safe: two simultaneous requests will NEVER receive the same token.
-        """
+       
         with self._lock:
             current = self._counter
             self._counter += 1
@@ -45,21 +30,20 @@ class TokenGenerator:
             return f"{self._prefix}{zfilled}"
 
     def current_count(self) -> int:
-        """Return how many tokens have been issued so far."""
+      
         with self._lock:
             return self._counter - 1
 
     def peek_next(self) -> str:
-        """Inspect the next token that will be generated without incrementing."""
+        
         with self._lock:
             return f"{self._prefix}{str(self._counter).zfill(self._padding)}"
 
     def daily_reset(self) -> None:
-        """Reset the counter back to 1 (thread-safe)."""
         with self._lock:
             self._counter = 1
 
     def set_counter(self, val: int) -> None:
-        """Set the internal counter to val (thread-safe)."""
+        
         with self._lock:
             self._counter = max(1, int(val))

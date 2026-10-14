@@ -1,26 +1,40 @@
 /* ====================================================================
    Smart Canteen – Service Worker
-   Provides PWA installation support and offline caching of safe
-   static assets only.
+   Provides robust PWA offline shell caching, safe cache versioning,
+   and automatic stale cache invalidation upon deployment.
+   
+   CACHE STRATEGY:
+   - HTML / Navigations: Network-First with Offline Cache Fallback.
+     Ensures live online users never see stale HTML shells.
+   - JS / CSS: Network-First with Cache Fallback.
+     Guarantees updated styles and scripts load immediately.
+   - Static Media (Images/Icons): Cache-First with Network Fallback.
+     Loads instantly; pruned and re-cached on new SW version.
    
    DOES NOT cache:
-   - /api/* (payment, orders, tokens, auth — always live)
-   - /static/data/* or any dynamic responses
+   - /api/* (orders, payments, tokens, auth, recommendations, queue — always live)
+   - /events (real-time SSE streams)
+   - /admin, /admin/login, /staff (management portals)
+   - Any non-GET requests
    ==================================================================== */
 
-const CACHE_NAME = 'smart-canteen-v2';
-const CACHE_VERSION = 2;
+const CACHE_VERSION = 'v2.1.0';
+const CACHE_NAME = `smart-canteen-${CACHE_VERSION}`;
 
-// Only cache safe static assets
+// Pre-cached static assets shell
 const STATIC_ASSETS = [
   '/',
+  '/index.html',
   '/static/style.css',
   '/static/app.js',
   '/static/manifest.json',
+  '/static/icon-192.png',
+  '/static/icon-512.png',
+  '/static/icon-maskable.png',
+  '/static/images/app_logo.svg',
   '/static/images/gpay_logo.svg',
   '/static/images/phonepe_logo.svg',
   '/static/images/upi_logo.svg',
-  '/static/images/app_logo.svg',
   '/static/images/idli.jpg',
   '/static/images/masala_dosa.jpg',
   '/static/images/pongal.jpg',
@@ -37,105 +51,157 @@ const STATIC_ASSETS = [
   '/static/images/tea.jpg',
   '/static/images/filter_coffee.jpg',
   '/static/images/lime_juice.jpg',
-  '/static/icon-192.png',
-  '/static/icon-512.png',
 ];
 
 // URLs that must NEVER be cached (always live from server)
 const NEVER_CACHE = [
   '/api/',
+  '/events',
   '/admin',
   '/admin/login',
   '/staff',
 ];
 
-// ── Install: pre-cache static shell ──────────────────────────────────────
+// ── Install: Pre-cache Static Shell ──────────────────────────────────────
 self.addEventListener('install', (event) => {
-  console.log('[SW] Installing Smart Canteen service worker v' + CACHE_VERSION);
+  console.log(`[SW] Installing Smart Canteen service worker (${CACHE_VERSION})`);
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      // Cache one by one so a single failure doesn't break everything
       return Promise.allSettled(
-        STATIC_ASSETS.map((url) =>
-          cache.add(url).catch((err) =>
-            console.warn('[SW] Failed to cache:', url, err)
-          )
-        )
-      );
-    }).then(() => self.skipWaiting())
-  );
-});
-
-// ── Activate: clean up old caches ────────────────────────────────────────
-self.addEventListener('activate', (event) => {
-  console.log('[SW] Activating Smart Canteen service worker');
-  event.waitUntil(
-    caches.keys().then((cacheNames) =>
-      Promise.all(
-        cacheNames
-          .filter((name) => name !== CACHE_NAME)
-          .map((name) => {
-            console.log('[SW] Deleting old cache:', name);
-            return caches.delete(name);
-          })
-      )
-    ).then(() => self.clients.claim())
-  );
-});
-
-// ── Fetch: Network-first for API, Cache-first for static ─────────────────
-self.addEventListener('fetch', (event) => {
-  const url = new URL(event.request.url);
-
-  // Never cache these – always go to network
-  const isNeverCache = NEVER_CACHE.some((path) =>
-    url.pathname.startsWith(path)
-  );
-
-  // Only handle GET requests
-  if (event.request.method !== 'GET' || isNeverCache) {
-    return; // Let the browser handle it normally
-  }
-
-  // For API calls – network only, no cache fallback
-  if (url.pathname.startsWith('/api/')) {
-    event.respondWith(fetch(event.request));
-    return;
-  }
-
-  // For SSE streams – always network
-  if (url.pathname.includes('/events')) {
-    event.respondWith(fetch(event.request));
-    return;
-  }
-
-  // For static assets – cache first, then network, update cache
-  event.respondWith(
-    caches.open(CACHE_NAME).then(async (cache) => {
-      const cached = await cache.match(event.request);
-      const networkFetch = fetch(event.request)
-        .then((response) => {
-          // Only cache successful, same-origin responses
-          if (
-            response &&
-            response.status === 200 &&
-            response.type === 'basic'
-          ) {
-            cache.put(event.request, response.clone());
-          }
-          return response;
+        STATIC_ASSETS.map((url) => {
+          // Use cache: 'reload' so pre-caching fetches latest deployed files from server
+          const req = new Request(url, { cache: 'reload' });
+          return fetch(req).then((response) => {
+            if (response && response.status === 200) {
+              return cache.put(url, response);
+            }
+          }).catch((err) => {
+            console.warn('[SW] Pre-cache asset skipped:', url, err);
+          });
         })
-        .catch(() => cached); // Offline fallback to cache
+      );
+    })
+  );
+  // NOTE: We deliberately do NOT call self.skipWaiting() here on updates,
+  // so existing tabs can display "New version available" and prompt the user.
+  // When user clicks "Update" (or SKIP_WAITING is sent), it will activate.
+});
 
-      // Return cached immediately if available, update in background
-      return cached || networkFetch;
+// ── Activate: Clean Up Outdated Caches Safely ────────────────────────────
+self.addEventListener('activate', (event) => {
+  console.log(`[SW] Activating Smart Canteen service worker (${CACHE_VERSION})`);
+  event.waitUntil(
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames.map((name) => {
+          // Only delete outdated Smart Canteen caches; never touch unrelated caches
+          if (name.startsWith('smart-canteen-') && name !== CACHE_NAME) {
+            console.log('[SW] Purging outdated cache:', name);
+            return caches.delete(name);
+          }
+        })
+      );
+    }).then(() => {
+      console.log(`[SW] Clients claimed by ${CACHE_VERSION}`);
+      return self.clients.claim();
     })
   );
 });
 
-// ── Background sync: notify clients of updates ───────────────────────────
+// ── Message: Communication with Client Pages ─────────────────────────────
 self.addEventListener('message', (event) => {
-  if (event.data && event.data.type === 'SKIP_WAITING') {
+  if (!event.data) return;
+
+  if (event.data.type === 'SKIP_WAITING') {
+    console.log('[SW] Received SKIP_WAITING command. Activating immediately...');
     self.skipWaiting();
+  } else if (event.data.type === 'GET_VERSION' && event.ports && event.ports[0]) {
+    event.ports[0].postMessage({
+      version: CACHE_VERSION,
+      cacheName: CACHE_NAME,
+    });
   }
+});
+
+// ── Fetch: Strategic Caching & Live Data Protection ───────────────────────
+self.addEventListener('fetch', (event) => {
+  const url = new URL(event.request.url);
+
+  // 1. Only intercept GET requests
+  if (event.request.method !== 'GET') {
+    return; // Pass through to browser
+  }
+
+  // 2. Never cache dynamic APIs, SSE streams, auth, or admin/staff dashboards
+  const isNeverCache = NEVER_CACHE.some((pattern) => url.pathname.startsWith(pattern)) ||
+                       url.pathname.includes('/events');
+  if (isNeverCache) {
+    return; // Browser network only
+  }
+
+  // 3. HTML / Navigation requests: Network-First with Offline Fallback
+  // Guarantees online users always get the freshest deployment shell.
+  if (event.request.mode === 'navigate' || url.pathname === '/' || url.pathname === '/index.html' || event.request.destination === 'document') {
+    event.respondWith(
+      fetch(event.request)
+        .then((networkResponse) => {
+          if (networkResponse && networkResponse.status === 200) {
+            const copy = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
+          }
+          return networkResponse;
+        })
+        .catch(async () => {
+          // Offline fallback
+          const cache = await caches.open(CACHE_NAME);
+          const cached = await cache.match(event.request) ||
+                         await cache.match('/') ||
+                         await cache.match('/index.html');
+          return cached || new Response('Offline - Smart Canteen is currently unavailable.', {
+            status: 503,
+            headers: { 'Content-Type': 'text/plain' },
+          });
+        })
+    );
+    return;
+  }
+
+  // 4. JavaScript and CSS: Network-First with Cache Fallback
+  // Ensures updated code is received immediately, falling back to cache if offline.
+  if (url.pathname.endsWith('.js') || url.pathname.endsWith('.css')) {
+    event.respondWith(
+      fetch(event.request)
+        .then((networkResponse) => {
+          if (networkResponse && networkResponse.status === 200) {
+            const copy = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
+          }
+          return networkResponse;
+        })
+        .catch(async () => {
+          const cache = await caches.open(CACHE_NAME);
+          return await cache.match(event.request, { ignoreSearch: true });
+        })
+    );
+    return;
+  }
+
+  // 5. Static Images & Icons: Cache-First with Network Fallback
+  event.respondWith(
+    caches.open(CACHE_NAME).then(async (cache) => {
+      const cached = await cache.match(event.request, { ignoreSearch: true });
+      if (cached) {
+        return cached;
+      }
+      try {
+        const networkResponse = await fetch(event.request);
+        if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
+          cache.put(event.request, networkResponse.clone());
+        }
+        return networkResponse;
+      } catch (err) {
+        return cached;
+      }
+    })
+  );
 });

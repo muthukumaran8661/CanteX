@@ -14,7 +14,7 @@
   <link rel="icon" type="image/png" href="/static/icon-192.png" />
   <link rel="apple-touch-icon" sizes="192x192" href="/static/icon-192.png" />
   <link rel="apple-touch-icon" sizes="512x512" href="/static/icon-512.png" />
-  <link rel="stylesheet" href="/static/style.css" />
+  <link rel="stylesheet" href="/static/style.css?v=2.1.0" />
 </head>
 <body>
 
@@ -391,6 +391,61 @@
       </div>
     </div>
 
+    <!-- Premium AI Recommendation Hub Section -->
+    <div class="section-container recommendations-hub-section" id="recommendationsHubSection">
+      <div class="section-header-row rec-header-row">
+        <div>
+          <span class="section-tag" id="recSectionTag">AI FOOD INTELLIGENCE</span>
+          <h2 class="section-title" id="recSectionTitle">Recommended for You</h2>
+          <p class="section-subtitle" id="recSectionSubtitle">Personalized selections calculated from real campus dining habits.</p>
+        </div>
+        <div class="rec-user-status-pill" id="recUserStatusPill">
+          <span class="rec-sparkle-icon">✨</span>
+          <span id="recStatusLabel">Personalized</span>
+        </div>
+      </div>
+
+      <!-- Recommendation Section Navigation Tabs -->
+      <div class="rec-tabs-scroll-wrap">
+        <div class="rec-tabs-nav" role="tablist" id="recTabsNav">
+          <button class="rec-tab-btn active" id="recTab-for-you" onclick="switchRecTab('for-you')">
+            <span class="rec-tab-icon">⭐</span>
+            <span class="rec-tab-title">Recommended for You</span>
+          </button>
+          <button class="rec-tab-btn" id="recTab-together" onclick="switchRecTab('together')">
+            <span class="rec-tab-icon">🤝</span>
+            <span class="rec-tab-title">Frequently Ordered Together</span>
+          </button>
+          <button class="rec-tab-btn" id="recTab-because" onclick="switchRecTab('because')">
+            <span class="rec-tab-icon">🎯</span>
+            <span class="rec-tab-title">Because You Ordered This</span>
+          </button>
+          <button class="rec-tab-btn" id="recTab-popular" onclick="switchRecTab('popular')">
+            <span class="rec-tab-icon">🔥</span>
+            <span class="rec-tab-title">Popular at Smart Canteen</span>
+          </button>
+          <button class="rec-tab-btn" id="recTab-new" onclick="switchRecTab('new')">
+            <span class="rec-tab-icon">✨</span>
+            <span class="rec-tab-title">Try Something New</span>
+          </button>
+          <button class="rec-tab-btn" id="recTab-quick" onclick="switchRecTab('quick')">
+            <span class="rec-tab-icon">⚡</span>
+            <span class="rec-tab-title">Quick Bites for You</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Recommendation Cards Container (Standard Food Cards) -->
+      <div class="food-cards-grid rec-cards-grid" id="recCardsContainer">
+        <!-- Rendered dynamically by JS -->
+      </div>
+
+      <!-- Frequently Ordered Together Pairs Container (Combo Cards) -->
+      <div class="rec-pairs-grid hidden" id="recPairsContainer">
+        <!-- Rendered dynamically by JS -->
+      </div>
+    </div>
+
     <!-- Featured Bestsellers Showcase -->
     <div class="section-container">
       <div class="section-header-row">
@@ -587,6 +642,17 @@
       <div class="cart-layout-card" id="cartContentBox">
         <div class="cart-items-wrapper" id="cartItemsContainer">
           <!-- Filled dynamically by JS -->
+        </div>
+
+        <!-- Frequently Ordered Together with Cart Add-ons -->
+        <div class="cart-rec-addon-box" id="cartRecAddonBox" style="display:none;">
+          <div class="cart-rec-addon-header">
+            <span class="cart-rec-addon-title">🤝 Frequently Ordered Together</span>
+            <span class="cart-rec-addon-sub">Students often add these companion items:</span>
+          </div>
+          <div class="cart-rec-addon-row" id="cartRecAddonRow">
+            <!-- Filled dynamically by JS -->
+          </div>
         </div>
 
         <!-- Bill Summary -->
@@ -1181,6 +1247,25 @@
   </div>
 </div>
 
+<!-- SW Update Notification Toast -->
+<div id="swUpdateToast" class="sw-update-toast" style="display:none;" role="alert" aria-live="polite">
+  <div class="sw-update-content">
+    <div class="sw-update-icon-wrap">
+      <span class="sw-update-icon">✨</span>
+    </div>
+    <div class="sw-update-text">
+      <strong>New version available!</strong>
+      <span>Refresh to update to the latest version.</span>
+    </div>
+  </div>
+  <div class="sw-update-actions">
+    <button id="swUpdateBtn" class="sw-update-btn" onclick="applySwUpdate()" aria-label="Update to latest version">
+      <span>🔄 Update</span>
+    </button>
+    <button class="sw-update-dismiss" onclick="dismissSwUpdate()" aria-label="Dismiss update notification">✕</button>
+  </div>
+</div>
+
 <!-- ══ PWA Install Banner ══════════════════════════════════════════ -->
 <div id="pwaBanner" class="pwa-install-banner" style="display:none;" role="complementary" aria-label="Install Smart Canteen app">
   <div class="pwa-banner-inner">
@@ -1205,11 +1290,11 @@
 </div>
 
 <!-- Scripts -->
-<script src="/static/app.js"></script>
+<script src="/static/app.js?v=2.1.0"></script>
 
 <script>
 /* ================================================================
-   Smart Canteen PWA – Service Worker Registration & Install Prompt
+   Smart Canteen PWA – Service Worker Registration & Live Update Flow
    ================================================================ */
 (function() {
   'use strict';
@@ -1218,7 +1303,7 @@
   const BANNER_DISMISSED_KEY = 'sc_pwa_banner_dismissed';
   const INSTALLED_KEY = 'sc_pwa_installed';
 
-  // ── Detect if already running in standalone mode ────────────────
+  // ── Detect standalone mode ──────────────────────────────────────
   const isStandalone = (
     window.matchMedia('(display-mode: standalone)').matches ||
     window.navigator.standalone === true ||
@@ -1226,35 +1311,127 @@
   );
 
   if (isStandalone) {
-    // Running as installed PWA — remove any install UI
+    // Already running as installed PWA – record and hide install prompt,
+    // but NEVER exit early so SW registration and updates continue working!
     localStorage.setItem(INSTALLED_KEY, '1');
     hidePwaBanner();
-    return;
   }
 
-  // ── Register Service Worker ─────────────────────────────────────
+  // ── Register Service Worker & Handle Updates ────────────────────
   if ('serviceWorker' in navigator) {
+    let pendingWorker = null;
+    let refreshing = false;
+
+    // When the controlling Service Worker changes, reload once to load fresh assets
+    navigator.serviceWorker.addEventListener('controllerchange', function() {
+      if (refreshing) return;
+      refreshing = true;
+      console.log('[PWA] Service Worker controller changed – reloading for latest version...');
+      window.location.reload();
+    });
+
+    function showSwUpdateToast(worker) {
+      if (worker) pendingWorker = worker;
+      const toast = document.getElementById('swUpdateToast');
+      if (!toast) return;
+      toast.style.display = 'flex';
+      requestAnimationFrame(function() {
+        toast.classList.add('sw-toast-visible');
+      });
+    }
+
+    function watchWorkerState(worker) {
+      if (!worker) return;
+      worker.addEventListener('statechange', function() {
+        if (worker.state === 'installed') {
+          if (navigator.serviceWorker.controller) {
+            // New version installed while existing page is open -> prompt user to update
+            console.log('[PWA] New version ready in background. Showing update toast.');
+            showSwUpdateToast(worker);
+          } else {
+            // Initial install: auto-activate to gain offline capabilities immediately
+            console.log('[PWA] Initial service worker installed. Skipping waiting.');
+            worker.postMessage({ type: 'SKIP_WAITING' });
+          }
+        }
+      });
+    }
+
     window.addEventListener('load', function() {
       navigator.serviceWorker.register('/sw.js', { scope: '/' })
         .then(function(reg) {
-          console.log('[PWA] Service Worker registered. Scope:', reg.scope);
+          console.log('[PWA] Service Worker registered with scope:', reg.scope);
 
-          // Listen for new SW versions
+          // 1. Worker already waiting when tab was loaded
+          if (reg.waiting && navigator.serviceWorker.controller) {
+            console.log('[PWA] Worker already waiting on load.');
+            showSwUpdateToast(reg.waiting);
+          }
+
+          // 2. Worker currently installing on load
+          if (reg.installing) {
+            watchWorkerState(reg.installing);
+          }
+
+          // 3. New worker discovered while tab remains open
           reg.addEventListener('updatefound', function() {
-            const newWorker = reg.installing;
-            if (newWorker) {
-              newWorker.addEventListener('statechange', function() {
-                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                  console.log('[PWA] New version available. Refresh to update.');
-                }
+            if (reg.installing) {
+              watchWorkerState(reg.installing);
+            }
+          });
+
+          // 4. Check for deployment updates on tab focus/visibility
+          document.addEventListener('visibilitychange', function() {
+            if (document.visibilityState === 'visible') {
+              reg.update().catch(function(err) {
+                console.warn('[PWA] Update check on visibility failed:', err);
               });
             }
           });
+
+          // 5. Periodic update check (every 60 seconds)
+          setInterval(function() {
+            reg.update().catch(function(err) {
+              console.warn('[PWA] Periodic update check failed:', err);
+            });
+          }, 60000);
         })
         .catch(function(err) {
           console.warn('[PWA] Service Worker registration failed:', err);
         });
     });
+
+    // Update button action: send message to waiting worker to skip waiting
+    window.applySwUpdate = function() {
+      console.log('[PWA] User accepted update.');
+      const btn = document.getElementById('swUpdateBtn');
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<span>⏳ Updating...</span>';
+      }
+
+      if (pendingWorker) {
+        pendingWorker.postMessage({ type: 'SKIP_WAITING' });
+      } else {
+        navigator.serviceWorker.getRegistration().then(function(reg) {
+          if (reg && reg.waiting) {
+            reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+          } else {
+            window.location.reload();
+          }
+        }).catch(function() {
+          window.location.reload();
+        });
+      }
+    };
+
+    // Dismiss update toast
+    window.dismissSwUpdate = function() {
+      const toast = document.getElementById('swUpdateToast');
+      if (!toast) return;
+      toast.classList.remove('sw-toast-visible');
+      setTimeout(function() { toast.style.display = 'none'; }, 350);
+    };
   }
 
   // ── Intercept browser install prompt (Android Chrome / Edge) ────

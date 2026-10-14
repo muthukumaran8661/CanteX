@@ -48,6 +48,7 @@ from services import (
     PaymentAdapter,
     EventBroker,
     AuthService,
+    RecommendationService,
 )
 from core import TokenGenerator, OrderQueue
 
@@ -59,10 +60,56 @@ app = Flask(__name__, static_folder="static", static_url_path="/static")
 app.secret_key = SECRET_KEY
 app.config["SESSION_COOKIE_HTTPONLY"] = True
 app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+app.config["SEND_FILE_MAX_AGE_DEFAULT"] = 0
 
 # Expose backward-compatible global instances
 token_gen = TokenGenerator()
 order_queue = OrderQueue()
+
+
+# ── Response Cache-Control & Deployment Freshness Hook ────────────────────
+
+@app.after_request
+def apply_cache_headers(response):
+    """
+    Ensure users always receive the latest files upon deployment:
+    1. Dynamic APIs, SSE events, and session endpoints must NEVER be cached (no-store).
+    2. HTML entrypoints (index, user.html, staff, admin) must never be cached by HTTP cache.
+    3. Service Worker must never be cached so browser detects updates on every check.
+    4. Static assets (CSS, JS) can revalidate or use versioned queries.
+    """
+    path = request.path
+
+    # Dynamic APIs & real-time SSE streams: completely dynamic, never cache
+    if path.startswith("/api/") or path.startswith("/events"):
+        response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0, post-check=0, pre-check=0"
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
+        return response
+
+    # Service Worker script: check on every visit/poll
+    if path == "/sw.js":
+        response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
+        response.headers["Service-Worker-Allowed"] = "/"
+        return response
+
+    # HTML documents: must never store stale HTML shells
+    content_type = response.headers.get("Content-Type", "")
+    if "text/html" in content_type or path in ["/", "/index.html", "/staff", "/admin", "/admin/login"]:
+        response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
+        return response
+
+    # Static assets: allow conditional caching with revalidation
+    if path.startswith("/static/"):
+        if "Cache-Control" not in response.headers:
+            response.headers["Cache-Control"] = "public, max-age=0, must-revalidate"
+        return response
+
+    return response
 
 
 # ── Authentication & Role Helpers ─────────────────────────────────────────
@@ -115,6 +162,7 @@ def admin_required(f):
 # ── Frontend Views ────────────────────────────────────────────────────────
 
 @app.route("/")
+@app.route("/index.html")
 def index():
     """Serve student ordering web application."""
     return send_from_directory("static", "user.html")
@@ -150,7 +198,9 @@ def service_worker():
     response = send_from_directory("static", "sw.js")
     response.headers["Content-Type"] = "application/javascript"
     response.headers["Service-Worker-Allowed"] = "/"
-    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
     return response
 
 
@@ -159,6 +209,7 @@ def pwa_manifest():
     """Serve PWA manifest at canonical root path."""
     response = send_from_directory("static", "manifest.json")
     response.headers["Content-Type"] = "application/manifest+json"
+    response.headers["Cache-Control"] = "public, max-age=3600"
     return response
 
 
@@ -649,6 +700,134 @@ def admin_staff():
     Protected admin endpoint returning staff roster with station assignment.
     """
     return jsonify(get_all_users(role=ROLE_STAFF)), 200
+
+
+# ── Recommendation System API Endpoints ──────────────────────────────────
+
+@app.route("/api/recommendations", methods=["GET", "POST"])
+def get_recommendations_endpoint():
+    """
+    GET / POST /api/recommendations
+    Returns the comprehensive 6-section recommendation response:
+      1. Recommended for You (Item-to-Item CF or Cold-start fallback)
+      2. Frequently Ordered Together (Pairs with 1-click combo)
+      3. Because You Ordered This (Contextual recommendations anchored to past order)
+      4. Popular at Smart Canteen (Bestsellers across categories)
+      5. Try Something New (Dishes student hasn't tried)
+      6. Quick Bites for You (Fast snacks & beverages)
+    Accepts optional cart item IDs in query params (?cart=1,2) or JSON body {"cart_item_ids": [1, 2]}.
+    """
+    current_user = get_current_user()
+    user_id = current_user.get("id") if current_user else None
+    email = current_user.get("email") if current_user else None
+
+    cart_ids = []
+    limit = 6
+
+    if request.method == "POST":
+        data = request.get_json(silent=True) or {}
+        cart_ids = data.get("cart_item_ids") or []
+        limit = int(data.get("limit", 6))
+    else:
+        cart_param = request.args.get("cart", "").strip()
+        if cart_param:
+            try:
+                cart_ids = [int(x) for x in cart_param.split(",") if x.isdigit()]
+            except Exception:
+                cart_ids = []
+        limit = int(request.args.get("limit", 6))
+
+    try:
+        recs = RecommendationService.get_recommendations(
+            user_id=user_id,
+            email=email,
+            cart_item_ids=cart_ids,
+            limit=limit,
+        )
+        return jsonify(recs), 200
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+
+@app.route("/api/recommendations/frequently-ordered-together", methods=["GET"])
+def frequently_ordered_together_endpoint():
+    """
+    GET /api/recommendations/frequently-ordered-together
+    Returns item pairs frequently purchased together in the same order.
+    Optional query params: ?cart=1,2
+    """
+    current_user = get_current_user()
+    user_id = current_user.get("id") if current_user else None
+    email = current_user.get("email") if current_user else None
+
+    cart_param = request.args.get("cart", "").strip()
+    cart_ids = []
+    if cart_param:
+        try:
+            cart_ids = [int(x) for x in cart_param.split(",") if x.isdigit()]
+        except Exception:
+            cart_ids = []
+
+    try:
+        res = RecommendationService.get_recommendations(
+            user_id=user_id,
+            email=email,
+            cart_item_ids=cart_ids,
+            limit=4,
+        )
+        return jsonify(res["sections"]["frequently_ordered_together"]), 200
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+
+@app.route("/api/admin/recommendations/insights", methods=["GET"])
+@admin_required
+def admin_recommendation_insights():
+    """
+    GET /api/admin/recommendations/insights
+    Protected admin endpoint returning real measured recommendation analytics.
+    """
+    try:
+        insights = RecommendationService.get_admin_insights()
+        return jsonify(insights), 200
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+
+@app.route("/api/admin/recommendations/seed", methods=["POST"])
+@admin_required
+def admin_seed_recommendations():
+    """
+    POST /api/admin/recommendations/seed
+    Protected admin endpoint to seed authentic historical orders for demonstration.
+    """
+    data = request.get_json(silent=True) or {}
+    count = int(data.get("count", 25))
+    force = bool(data.get("force", False))
+    try:
+        inserted = RecommendationService.seed_demo_orders(count=count, force=force)
+        return jsonify({
+            "success": True,
+            "orders_seeded": inserted,
+            "message": f"Successfully seeded {inserted} authentic historical orders.",
+        }), 200
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+
+@app.route("/api/admin/recommendations/evaluate", methods=["GET"])
+@admin_required
+def admin_evaluate_recommendations():
+    """
+    GET /api/admin/recommendations/evaluate
+    Protected admin endpoint calculating offline ranking metric (Precision@K and Recall@K).
+    """
+    k = int(request.args.get("k", 3))
+    try:
+        results = RecommendationService.evaluate_offline_ranking(k=k)
+        return jsonify(results), 200
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
 
 
 # ── Entry Point ───────────────────────────────────────────────────────────

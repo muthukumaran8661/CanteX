@@ -105,8 +105,19 @@ DEFAULT_STUDENT_NAME     = "Karthik Raja"
 
 SECRET_KEY = os.environ.get("SECRET_KEY", "smart-canteen-auth-secure-secret-key-2026")
 
+# ── Recommendation Engine Configuration ─────────────────────────────────
+REC_WEIGHT_ITEM_SIMILARITY   = 0.50   # Weight for Item-to-Item collaborative filtering
+REC_WEIGHT_COOCCURRENCE       = 0.20   # Weight for co-occurrence frequency in orders
+REC_WEIGHT_RECENCY           = 0.15   # Weight for user recency alignment
+REC_WEIGHT_POPULARITY        = 0.15   # Weight for global order popularity
+REC_RECENCY_DECAY_DAYS       = 7.0    # Recency decay timescale in days
+REC_CACHE_TTL_SECONDS        = 300    # In-memory similarity cache TTL in seconds
+REC_DEFAULT_TOP_K            = 6      # Default recommendations limit
+REC_MAX_PER_CATEGORY         = 2      # Max items per category for diversity re-ranking
+
 # ── Flask server ──────────────────────────────────────────────────────────
 FLASK_HOST  = "0.0.0.0"
 FLASK_PORT  = 5000
 FLASK_DEBUG = True
+
 

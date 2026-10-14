@@ -488,6 +488,339 @@ function renderHomeBestsellers() {
   renderFoodGrid(topItems, container);
 }
 
+}
+
+/* ══════════════════════════════════════════════════════════════
+   AI RECOMMENDATION ENGINE CLIENT (FOOD-TECH EXPERIENCE)
+══════════════════════════════════════════════════════════════ */
+
+let currentRecData = null;
+let activeRecTab = 'for-you';
+
+/** Fetch recommendation payload from /api/recommendations */
+async function fetchRecommendations() {
+  const hub = $('recommendationsHubSection');
+  if (!hub) return;
+
+  try {
+    const cartIds = Object.keys(cart).map(Number);
+    let url = '/api/recommendations?limit=6';
+    if (cartIds.length > 0) {
+      url += `&cart=${cartIds.join(',')}`;
+    }
+
+    const res = await fetch(url);
+    if (!res.ok) return;
+
+    currentRecData = await res.json();
+
+    // Update status badge (Personalized vs Campus Bestsellers)
+    const statusPill = $('recUserStatusPill');
+    const statusLabel = $('recStatusLabel');
+    if (statusPill && statusLabel) {
+      if (currentRecData.has_history) {
+        statusLabel.textContent = 'Personalized for You';
+        statusPill.style.background = 'linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%)';
+        statusPill.style.color = '#047857';
+        statusPill.style.borderColor = '#a7f3d0';
+      } else {
+        statusLabel.textContent = 'Campus Bestsellers';
+        statusPill.style.background = 'linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%)';
+        statusPill.style.color = 'var(--brand-red, #c8102e)';
+        statusPill.style.borderColor = '#fecaca';
+      }
+    }
+
+    renderActiveRecTab();
+    renderCartAddonRecommendations();
+  } catch (err) {
+    console.warn('Recommendation fetch error:', err);
+  }
+}
+
+/** Switch active recommendation section tab */
+function switchRecTab(tabKey) {
+  activeRecTab = tabKey;
+
+  document.querySelectorAll('.rec-tab-btn').forEach(btn => {
+    btn.classList.remove('active');
+  });
+
+  const activeBtn = $(`recTab-${tabKey}`);
+  if (activeBtn) {
+    activeBtn.classList.add('active');
+  }
+
+  renderActiveRecTab();
+}
+
+/** Render content for currently selected recommendation tab */
+function renderActiveRecTab() {
+  if (!currentRecData || !currentRecData.sections) return;
+
+  const cardsGrid = $('recCardsContainer');
+  const pairsGrid = $('recPairsContainer');
+  const tagEl = $('recSectionTag');
+  const titleEl = $('recSectionTitle');
+  const subEl = $('recSectionSubtitle');
+
+  const s = currentRecData.sections;
+
+  if (activeRecTab === 'together') {
+    // Frequently Ordered Together: Combo Pairs
+    if (cardsGrid) cardsGrid.classList.add('hidden');
+    if (pairsGrid) pairsGrid.classList.remove('hidden');
+
+    const sec = s.frequently_ordered_together;
+    if (tagEl) tagEl.textContent = sec.badge || 'POPULAR PAIRINGS';
+    if (titleEl) titleEl.textContent = sec.title || 'Frequently Ordered Together';
+    if (subEl) subEl.textContent = sec.description || 'Dishes frequently enjoyed together in a single order.';
+
+    renderRecPairCards(sec.pairs || [], pairsGrid);
+  } else {
+    // Single item cards
+    if (pairsGrid) pairsGrid.classList.add('hidden');
+    if (cardsGrid) cardsGrid.classList.remove('hidden');
+
+    let sec = s.recommended_for_you;
+    if (activeRecTab === 'because') sec = s.because_you_ordered;
+    else if (activeRecTab === 'popular') sec = s.popular_items;
+    else if (activeRecTab === 'new') sec = s.try_something_new;
+    else if (activeRecTab === 'quick') sec = s.quick_bites;
+
+    if (tagEl) tagEl.textContent = sec.badge || 'CURATED SELECTION';
+    if (titleEl) titleEl.textContent = sec.title || 'Recommended Food';
+    if (subEl) subEl.textContent = sec.description || '';
+
+    renderRecFoodCards(sec.items || [], cardsGrid);
+  }
+}
+
+/** Render standard food cards for a recommendation section */
+function renderRecFoodCards(items, containerEl) {
+  if (!containerEl) return;
+  containerEl.innerHTML = '';
+
+  if (!items || items.length === 0) {
+    containerEl.innerHTML = `
+      <div style="grid-column: 1/-1; text-align: center; padding: 30px; color: #64748b;">
+        <span style="font-size: 2rem;">🍽️</span>
+        <p style="margin-top: 8px; font-weight: 700;">No recommendation candidates available at the moment.</p>
+      </div>
+    `;
+    return;
+  }
+
+  items.forEach(item => {
+    const qtyInCart = cart[item.id] ? cart[item.id].qty : 0;
+    const imgSrc = resolveImgSrc(item.image);
+    const isVeg = item.category !== 'Non-Veg';
+
+    const card = document.createElement('div');
+    card.className = 'swiggy-dish-card rec-card-wrap';
+    card.id = `rec-dish-${item.id}`;
+
+    card.innerHTML = `
+      <div class="swiggy-dish-info">
+        <div class="rec-reason-badge" title="Algorithmic recommendation reason">
+          <span>💡</span> ${item.reason}
+        </div>
+        <div class="swiggy-type-row">
+          <span class="swiggy-food-type-icon ${isVeg ? 'veg' : 'nonveg'}" title="${isVeg ? 'Pure Veg' : 'Non-Veg'}">
+            <span class="type-dot"></span>
+          </span>
+          <span class="swiggy-dish-category-tag">${item.category}</span>
+          ${item.badge ? `<span class="swiggy-card-badge">${item.badge}</span>` : ''}
+        </div>
+        <h3 class="swiggy-dish-title">${item.name}</h3>
+        <div class="swiggy-price-row">
+          <span class="swiggy-dish-price">${fmtPrice(item.price)}</span>
+        </div>
+        <p class="swiggy-dish-desc">${item.description || 'Authentic kitchen specialty.'}</p>
+      </div>
+
+      <div class="swiggy-dish-media-col" data-item-id="${item.id}">
+        <div class="swiggy-img-box">
+          <img
+            src="${imgSrc}"
+            alt="${item.name}"
+            class="swiggy-dish-img"
+            loading="lazy"
+            onerror="this.onerror=null;this.src='/static/images/idli.jpg';"
+          />
+        </div>
+        <div class="swiggy-action-btn-wrap">
+          <button
+            class="swiggy-add-btn ${qtyInCart > 0 ? 'hidden' : ''}"
+            onclick="addToCart(${item.id})"
+            aria-label="Add ${item.name} to cart"
+          >
+            ADD <span>+</span>
+          </button>
+          <div class="swiggy-stepper ${qtyInCart > 0 ? '' : 'hidden'}">
+            <button class="step-btn minus" onclick="changeQty(${item.id}, -1)">−</button>
+            <span class="swiggy-stepper-val">${qtyInCart}</span>
+            <button class="step-btn plus" onclick="changeQty(${item.id}, 1)">+</button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    containerEl.appendChild(card);
+  });
+}
+
+/** Render Frequently Ordered Together pair combo cards */
+function renderRecPairCards(pairs, containerEl) {
+  if (!containerEl) return;
+  containerEl.innerHTML = '';
+
+  if (!pairs || pairs.length === 0) {
+    containerEl.innerHTML = `
+      <div style="grid-column: 1/-1; text-align: center; padding: 30px; color: #64748b;">
+        <span style="font-size: 2rem;">🤝</span>
+        <p style="margin-top: 8px; font-weight: 700;">No paired orders recorded yet. As orders are placed together, combos will appear here.</p>
+      </div>
+    `;
+    return;
+  }
+
+  pairs.forEach(pair => {
+    const itA = pair.item_a;
+    const itB = pair.item_b;
+    const comboPrice = pair.combo_price;
+
+    const card = document.createElement('div');
+    card.className = 'rec-pair-card';
+
+    card.innerHTML = `
+      <div class="rec-pair-header">
+        <span class="rec-pair-reason-tag">🤝 ${pair.reason}</span>
+      </div>
+
+      <div class="rec-pair-items-row">
+        <!-- Item A -->
+        <div class="rec-pair-item-col">
+          <img src="${resolveImgSrc(itA.image)}" alt="${itA.name}" class="rec-pair-thumb" onerror="this.src='/static/images/idli.jpg'" />
+          <div class="rec-pair-item-info">
+            <span class="rec-pair-item-name">${itA.name}</span>
+            <span class="rec-pair-item-price">${fmtPrice(itA.price)}</span>
+          </div>
+        </div>
+
+        <!-- Plus connector -->
+        <div class="rec-pair-plus-badge">+</div>
+
+        <!-- Item B -->
+        <div class="rec-pair-item-col">
+          <img src="${resolveImgSrc(itB.image)}" alt="${itB.name}" class="rec-pair-thumb" onerror="this.src='/static/images/filter_coffee.jpg'" />
+          <div class="rec-pair-item-info">
+            <span class="rec-pair-item-name">${itB.name}</span>
+            <span class="rec-pair-item-price">${fmtPrice(itB.price)}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="rec-pair-footer">
+        <div>
+          <span class="rec-combo-total-lbl">Pair Combo Total:</span>
+          <div class="rec-combo-total-price">${fmtPrice(comboPrice)}</div>
+        </div>
+        <button class="btn-add-combo" onclick="addPairComboToCart(${itA.id}, ${itB.id})">
+          + Add Both (${fmtPrice(comboPrice)})
+        </button>
+      </div>
+    `;
+
+    containerEl.appendChild(card);
+  });
+}
+
+/** Add both items of a Frequently Ordered Together pair directly to existing cart */
+function addPairComboToCart(idA, idB) {
+  if (!currentUser) {
+    openGuestRequiredModal();
+    return;
+  }
+
+  const itA = allMenuItems.find(i => i.id === idA);
+  const itB = allMenuItems.find(i => i.id === idB);
+
+  if (itA) {
+    if (cart[idA]) cart[idA].qty++;
+    else cart[idA] = { id: itA.id, name: itA.name, qty: 1, price: itA.price, image: itA.image, category: itA.category };
+    updateAllCardSteppers(idA);
+  }
+
+  if (itB) {
+    if (cart[idB]) cart[idB].qty++;
+    else cart[idB] = { id: itB.id, name: itB.name, qty: 1, price: itB.price, image: itB.image, category: itB.category };
+    updateAllCardSteppers(idB);
+  }
+
+  updateCartBadge();
+  showToast(`✓ Added ${itA ? itA.name : 'Item'} + ${itB ? itB.name : 'Item'} to your tray!`, 'success');
+}
+
+/** Render Frequently Ordered Together add-ons inside Cart view */
+function renderCartAddonRecommendations() {
+  const box = $('cartRecAddonBox');
+  const row = $('cartRecAddonRow');
+  if (!box || !row) return;
+
+  const cartIds = Object.keys(cart).map(Number);
+  if (cartIds.length === 0 || !currentRecData || !currentRecData.sections) {
+    box.style.display = 'none';
+    return;
+  }
+
+  // Find candidate companion items from pairs and quick bites that are not in cart
+  const candidates = [];
+  const seenIds = new Set(cartIds);
+
+  const pairs = currentRecData.sections.frequently_ordered_together?.pairs || [];
+  pairs.forEach(p => {
+    if (!seenIds.has(p.item_a.id) && p.item_a.stock > 0) {
+      candidates.push(p.item_a);
+      seenIds.add(p.item_a.id);
+    }
+    if (!seenIds.has(p.item_b.id) && p.item_b.stock > 0) {
+      candidates.push(p.item_b);
+      seenIds.add(p.item_b.id);
+    }
+  });
+
+  const quick = currentRecData.sections.quick_bites?.items || [];
+  quick.forEach(q => {
+    if (!seenIds.has(q.id) && q.stock > 0) {
+      candidates.push(q);
+      seenIds.add(q.id);
+    }
+  });
+
+  if (candidates.length === 0) {
+    box.style.display = 'none';
+    return;
+  }
+
+  row.innerHTML = '';
+  candidates.slice(0, 4).forEach(it => {
+    const card = document.createElement('div');
+    card.className = 'cart-rec-addon-card';
+    card.innerHTML = `
+      <img src="${resolveImgSrc(it.image)}" alt="${it.name}" class="cart-rec-addon-thumb" onerror="this.src='/static/images/idli.jpg'" />
+      <div class="cart-rec-addon-details">
+        <div class="cart-rec-addon-name">${it.name}</div>
+        <div class="cart-rec-addon-price">${fmtPrice(it.price)}</div>
+      </div>
+      <button class="btn-cart-rec-add" onclick="addToCart(${it.id})">+ Add</button>
+    `;
+    row.appendChild(card);
+  });
+
+  box.style.display = 'block';
+}
+
 /* ══════════════════════════════════════════════════════════════
    CART & STEPPER STATE
 ══════════════════════════════════════════════════════════════ */
@@ -693,6 +1026,8 @@ function renderCartView() {
 
   if (subtotalEl) subtotalEl.textContent = fmtPrice(subtotal);
   if (grandTotalEl) grandTotalEl.textContent = fmtPrice(subtotal);
+
+  renderCartAddonRecommendations();
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -842,6 +1177,9 @@ async function processOrderPayment() {
 
       // 7. Start polling
       startLiveTokenPolling(data.token);
+
+      // 8. Re-fetch personalized recommendations with new order history
+      fetchRecommendations();
 
     } else {
       // Payment Declined -> NO TOKEN, NO QUEUE ENTRY!
@@ -1552,6 +1890,7 @@ async function checkAuthStatus() {
       currentUser = null;
     }
     updateAuthHeaderUI();
+    fetchRecommendations();
   } catch (err) {
     console.error('Auth status check error:', err);
   }
@@ -1698,6 +2037,7 @@ async function handleLoginSubmit(event) {
       updateAuthHeaderUI();
       closeAuthModal();
       showToast(data.message || `Welcome, ${data.user.name}!`, 'success');
+      fetchRecommendations();
     } else {
       if (errBox) {
         errBox.textContent = data.message || 'Invalid email or password.';
@@ -1741,6 +2081,7 @@ async function handleRegisterSubmit(event) {
       updateAuthHeaderUI();
       closeAuthModal();
       showToast(data.message || `Account created! Welcome, ${data.user.name}!`, 'success');
+      fetchRecommendations();
     } else {
       if (errBox) {
         errBox.textContent = data.message || 'Registration failed.';
@@ -1766,6 +2107,7 @@ async function logoutUser() {
   closeUserDropdown();
   showToast('✓ Signed out successfully.', 'success');
   navTo('home');
+  fetchRecommendations();
 }
 
 /** Toggle User Dropdown Panel */
@@ -1816,5 +2158,6 @@ document.addEventListener('DOMContentLoaded', () => {
     navTo('home');
     loadStudentLiveBoard();
     initClientSSE();
+    fetchRecommendations();
   }
 });
