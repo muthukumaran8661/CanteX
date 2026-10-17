@@ -7,9 +7,9 @@
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <meta name="apple-mobile-web-app-title" content="Smart Canteen" />
-  <title>SMART CANTEEN – Fresh. Fast. Traditional.</title>
-  <meta name="description" content="Premium fast-food restaurant ordering web application for Smart Canteen. Authentic Tamil Nadu dishes, instant live tokens, and zero queue waiting." />
+  <meta name="apple-mobile-web-app-title" content="Smart Food Recommender" />
+  <title>SMART FOOD RECOMMENDER – Discover Food You'll Love</title>
+  <meta name="description" content="Intelligent Food Recommendation System for Smart Canteen. Authentic Tamil Nadu dishes powered by Item-to-Item Collaborative Filtering, genuine ratings, and zero queue waiting." />
   <link rel="manifest" href="/manifest.json" />
   <link rel="icon" type="image/png" href="/static/icon-192.png" />
   <link rel="apple-touch-icon" sizes="192x192" href="/static/icon-192.png" />
@@ -30,8 +30,8 @@
         <img src="/static/icon-192.png" alt="Smart Canteen Logo" class="brand-logo-img" />
       </div>
       <div class="brand-text-wrap">
-        <span class="brand-title">SMART CANTEEN</span>
-        <span class="brand-subtitle">Fresh • Fast • Traditional</span>
+        <span class="brand-title">SMART FOOD RECOMMENDER</span>
+        <span class="brand-subtitle">Discover Food You'll Love</span>
       </div>
     </a>
 
@@ -47,12 +47,11 @@
     <!-- Desktop Navigation Links -->
     <nav class="desktop-nav" aria-label="Main Navigation">
       <a class="nav-item active" id="nav-home" href="#home" onclick="navTo('home'); return false;">Home</a>
-      <a class="nav-item" id="nav-menu" href="#menu" onclick="navTo('menu'); return false;">Menu</a>
-      <a class="nav-item" id="nav-offers" href="#offers" onclick="navTo('offers'); return false;">
-        Offers <span class="nav-new-badge">NEW</span>
-      </a>
-      <a class="nav-item" id="nav-track" href="#track" onclick="navTo('track'); return false;">Track Order</a>
+      <a class="nav-item" id="nav-explore" href="#explore" onclick="navTo('explore'); return false;">Explore Food</a>
+      <a class="nav-item" id="nav-top-rated" href="#top-rated" onclick="navTo('top-rated'); return false;">⭐ Top Rated</a>
+      <a class="nav-item nav-item-auth" id="nav-my-ratings" href="#my-ratings" onclick="navTo('my-ratings'); return false;" style="display:none;">My Ratings</a>
       <a class="nav-item" id="nav-orders" href="#orders" onclick="navTo('orders'); return false;">My Orders</a>
+      <a class="nav-item" id="nav-track" href="#track" onclick="navTo('track'); return false;">Track</a>
     </nav>
 
     <!-- Header Actions (Right) -->
@@ -87,6 +86,8 @@
               <span class="dropdown-role-tag" id="dropdownMetaRole">CUSTOMER</span>
             </div>
             <div class="dropdown-divider"></div>
+            <a href="#my-ratings" onclick="navTo('my-ratings'); closeUserDropdown(); return false;" class="user-dropdown-link">⭐ My Ratings</a>
+            <a href="#profile" onclick="navTo('profile'); closeUserDropdown(); return false;" class="user-dropdown-link">🍽️ My Preferences</a>
             <a href="#orders" onclick="navTo('orders'); closeUserDropdown(); return false;" class="user-dropdown-link">📋 My Orders</a>
             <a href="#track" onclick="navTo('track'); closeUserDropdown(); return false;" class="user-dropdown-link">⏱️ Track Order</a>
             <div id="staffLinkContainer" style="display:none;">
@@ -124,17 +125,21 @@
 <div class="mobile-drawer" id="mobileDrawer">
   <div class="drawer-header">
     <div style="display:flex;align-items:center;gap:10px;">
-      <img src="/static/icon-192.png" alt="Smart Canteen" style="width:34px;height:34px;border-radius:10px;box-shadow:0 2px 8px rgba(200,16,46,0.25);" />
-      <div class="brand-title" style="font-size:1.15rem;">SMART CANTEEN</div>
+      <img src="/static/icon-192.png" alt="Smart Food Recommender" style="width:34px;height:34px;border-radius:10px;box-shadow:0 2px 8px rgba(200,16,46,0.25);" />
+      <div style="display:flex;flex-direction:column;">
+        <div class="brand-title" style="font-size:1rem;line-height:1.2;">SMART FOOD RECOMMENDER</div>
+        <span style="font-size:0.72rem;color:#94a3b8;font-weight:500;">Discover Food You'll Love</span>
+      </div>
     </div>
     <button class="drawer-close-btn" onclick="toggleMobileDrawer()">✕</button>
   </div>
   <div class="drawer-nav">
     <a href="#home" onclick="navTo('home'); toggleMobileDrawer(); return false;">🏠 Home</a>
-    <a href="#menu" onclick="navTo('menu'); toggleMobileDrawer(); return false;">🍽️ Menu</a>
-    <a href="#offers" onclick="navTo('offers'); toggleMobileDrawer(); return false;">🔥 Today's Offers <span class="nav-new-badge">NEW</span></a>
-    <a href="#track" onclick="navTo('track'); toggleMobileDrawer(); return false;">⏱️ Track Order</a>
+    <a href="#explore" onclick="navTo('explore'); toggleMobileDrawer(); return false;">🔍 Explore Food</a>
+    <a href="#top-rated" onclick="navTo('top-rated'); toggleMobileDrawer(); return false;">⭐ Top Rated</a>
+    <a href="#my-ratings" onclick="navTo('my-ratings'); toggleMobileDrawer(); return false;" class="drawer-auth-link" style="display:none;">🌟 My Ratings</a>
     <a href="#orders" onclick="navTo('orders'); toggleMobileDrawer(); return false;">📋 My Orders</a>
+    <a href="#track" onclick="navTo('track'); toggleMobileDrawer(); return false;">⏱️ Track Order</a>
     <div style="height:1px;background:#e2e8f0;margin:8px 0;"></div>
     <div id="drawerGuestAuth">
       <a href="javascript:void(0)" onclick="openAuthModal('login'); toggleMobileDrawer();" style="color:var(--brand-red); font-weight:800;">🔐 Sign In</a>
@@ -855,6 +860,33 @@
           <!-- Filled by JS -->
         </div>
 
+        <!-- 5-Star Food Rating Prompt for AI Recommendations -->
+        <div class="token-rating-prompt" id="confirmRatingPrompt">
+          <div class="token-rating-header">
+            <span class="token-rating-icon">⭐</span>
+            <div>
+              <h4 class="token-rating-title">Rate Your Food (1 to 5 Stars)</h4>
+              <p class="token-rating-subtitle">Submit your rating out of 5 stars so our AI can immediately recommend personalized canteen dishes!</p>
+            </div>
+          </div>
+          <div class="token-rating-items" id="confirmRatingItemsList">
+            <!-- Dynamically populated per ordered dish with 5 interactive stars -->
+          </div>
+          <!-- Live AI Recommendation Feedback Banner -->
+          <div class="token-rec-feedback-box hidden" id="tokenRecFeedbackBox">
+            <div class="token-rec-feedback-content">
+              <span class="token-rec-sparkle">✨</span>
+              <div class="token-rec-text">
+                <strong>Recommendations Updated!</strong>
+                <span>Personalized dishes calculated from your 5-star rating are ready.</span>
+              </div>
+            </div>
+            <button class="btn-primary btn-sm" onclick="navTo('home'); scrollRecHub();">
+              View Recommendations →
+            </button>
+          </div>
+        </div>
+
         <!-- Action CTAs -->
         <div class="token-cta-group">
           <button class="btn-primary btn-lg" onclick="navTo('track')">
@@ -1006,6 +1038,175 @@
     </div>
   </section>
 
+  <!-- ── 10. EXPLORE FOOD VIEW ──────────────────────── -->
+  <section class="app-view" id="view-explore">
+    <div class="section-container">
+      <div class="menu-page-header">
+        <h1 class="page-main-title">Explore Food</h1>
+        <p class="page-main-subtitle">Search, filter, and discover your next favourite dish from our canteen.</p>
+      </div>
+
+      <!-- Filter Toolbar -->
+      <div class="explore-filter-bar">
+        <!-- Search -->
+        <div class="search-box-wrap">
+          <span class="search-input-icon">🔍</span>
+          <input type="text" id="exploreSearchInput" class="search-input-field" placeholder="Search for dosa, biriyani, coffee..." autocomplete="off" aria-label="Search food" oninput="handleExploreSearch()" />
+          <button class="search-clear-cross" id="exploreClearBtn" onclick="clearExploreSearch()" style="display:none;">✕</button>
+        </div>
+
+        <!-- Sort -->
+        <div class="sort-box-wrap">
+          <label for="exploreSortSelect" class="sort-label">Sort:</label>
+          <select id="exploreSortSelect" class="sort-select" onchange="renderExploreGrid()">
+            <option value="top-rated">⭐ Top Rated</option>
+            <option value="most-rated">💬 Most Rated</option>
+            <option value="price-asc">💸 Price: Low</option>
+            <option value="price-desc">💰 Price: High</option>
+            <option value="popular">🔥 Most Popular</option>
+          </select>
+        </div>
+
+        <!-- Dietary filter -->
+        <div class="sort-box-wrap">
+          <label for="exploreDietSelect" class="sort-label">Diet:</label>
+          <select id="exploreDietSelect" class="sort-select" onchange="renderExploreGrid()">
+            <option value="ALL">All</option>
+            <option value="VEG">🌿 Veg Only</option>
+            <option value="NON_VEG">🍗 Non-Veg</option>
+          </select>
+        </div>
+
+        <!-- Available Only toggle -->
+        <label class="explore-toggle-wrap">
+          <input type="checkbox" id="exploreAvailableOnly" onchange="renderExploreGrid()" checked />
+          <span class="explore-toggle-label">Available Only</span>
+        </label>
+      </div>
+
+      <!-- Star filter chips -->
+      <div class="explore-star-chips">
+        <button class="star-chip active" id="starChip-all" onclick="setExploreStarFilter('all')">All</button>
+        <button class="star-chip" id="starChip-4" onclick="setExploreStarFilter(4)">⭐4★+</button>
+        <button class="star-chip" id="starChip-3" onclick="setExploreStarFilter(3)">⭐3★+</button>
+        <button class="star-chip" id="starChip-nr" onclick="setExploreStarFilter('unrated')">Not Rated Yet</button>
+      </div>
+
+      <!-- Category chips -->
+      <div class="menu-category-pills" id="exploreCategoryPills" role="tablist"></div>
+
+      <!-- Status bar -->
+      <div class="menu-status-bar">
+        <span class="dish-counter-badge" id="exploreCounterText">Loading dishes...</span>
+      </div>
+
+      <!-- Grid -->
+      <div class="food-cards-grid" id="exploreGrid" role="region" aria-live="polite"></div>
+
+      <!-- Empty state -->
+      <div class="empty-state-box hidden" id="exploreEmptyState">
+        <div class="empty-state-icon">🍽️</div>
+        <h3>No dishes found</h3>
+        <p id="exploreEmptyMsg">Try adjusting your filters.</p>
+        <button class="btn-secondary" onclick="clearExploreSearch()">Clear Filters</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 11. TOP RATED VIEW ────────────────────────── -->
+  <section class="app-view" id="view-top-rated">
+    <div class="section-container">
+      <div class="menu-page-header">
+        <h1 class="page-main-title">⭐ Top Rated Food</h1>
+        <p class="page-main-subtitle">Ranked by Bayesian average rating from genuine student reviews.</p>
+      </div>
+      <div class="top-rated-meta-strip" id="topRatedMetaStrip"></div>
+      <div class="food-cards-grid" id="topRatedGrid" role="region" aria-live="polite"></div>
+      <div class="state-loader hidden" id="topRatedLoader">
+        <div class="spinner-ring"></div>
+        <p>Computing Bayesian rankings...</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 12. MY RATINGS VIEW ──────────────────────── -->
+  <section class="app-view" id="view-my-ratings">
+    <div class="section-container" style="max-width:960px;">
+      <div class="menu-page-header">
+        <h1 class="page-main-title">⭐ My Ratings</h1>
+        <p class="page-main-subtitle">All dishes you have rated. Edit or remove any time.</p>
+      </div>
+
+      <!-- Login wall -->
+      <div class="empty-state-box" id="myRatingsLoginWall" style="display:none;">
+        <div class="empty-state-icon">🔐</div>
+        <h3>Sign in to view your ratings</h3>
+        <p>Rate dishes after ordering to unlock personalised recommendations.</p>
+        <button class="btn-primary" onclick="openAuthModal('login')">Sign In</button>
+      </div>
+
+      <!-- Grid -->
+      <div class="my-ratings-grid" id="myRatingsGrid"></div>
+
+      <!-- Empty state (logged in but 0 ratings) -->
+      <div class="empty-state-box hidden" id="myRatingsEmptyState">
+        <div class="empty-state-icon">⭐</div>
+        <h3>No ratings yet</h3>
+        <p>Start rating dishes to get smarter personalised recommendations!</p>
+        <button class="btn-primary" onclick="navTo('explore')">Explore &amp; Rate Dishes</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 13. PROFILE / PREFERENCES VIEW ────────────── -->
+  <section class="app-view" id="view-profile">
+    <div class="section-container" style="max-width:680px;">
+      <div class="menu-page-header">
+        <h1 class="page-main-title">🍽️ My Taste Profile</h1>
+        <p class="page-main-subtitle">Set your food preferences to get even smarter recommendations.</p>
+      </div>
+
+      <!-- Login wall -->
+      <div class="empty-state-box" id="profileLoginWall" style="display:none;">
+        <div class="empty-state-icon">🔐</div>
+        <h3>Sign in to set preferences</h3>
+        <button class="btn-primary" onclick="openAuthModal('login')">Sign In</button>
+      </div>
+
+      <!-- Preferences Form -->
+      <div class="preferences-form-card" id="preferencesFormCard" style="display:none;">
+        <div class="pref-section">
+          <h3>🌿 Dietary Preference</h3>
+          <p>Tell us your dietary style for better dish filtering.</p>
+          <div class="pref-diet-chips" id="prefDietChips">
+            <button class="pref-chip" id="dietChip-ALL" onclick="selectDietPref('ALL')">All Foods</button>
+            <button class="pref-chip" id="dietChip-VEG" onclick="selectDietPref('VEG')">🌿 Vegetarian</button>
+            <button class="pref-chip" id="dietChip-NON_VEG" onclick="selectDietPref('NON_VEG')">🍗 Non-Veg</button>
+          </div>
+        </div>
+
+        <div class="pref-section">
+          <h3>👍 Favourite Categories</h3>
+          <p>Select categories you love (multi-select).</p>
+          <div class="pref-category-chips" id="prefCategoryChips">
+            <button class="pref-chip" data-cat="Breakfast" onclick="toggleCategoryPref('Breakfast')">Breakfast</button>
+            <button class="pref-chip" data-cat="Rice &amp; Meals" onclick="toggleCategoryPref('Rice & Meals')">Rice &amp; Meals</button>
+            <button class="pref-chip" data-cat="Tiffin" onclick="toggleCategoryPref('Tiffin')">Tiffin</button>
+            <button class="pref-chip" data-cat="Non-Vegetarian" onclick="toggleCategoryPref('Non-Vegetarian')">Non-Veg</button>
+            <button class="pref-chip" data-cat="Snacks" onclick="toggleCategoryPref('Snacks')">Snacks</button>
+            <button class="pref-chip" data-cat="Beverages" onclick="toggleCategoryPref('Beverages')">Beverages</button>
+            <button class="pref-chip" data-cat="Specials" onclick="toggleCategoryPref('Specials')">Specials</button>
+          </div>
+        </div>
+
+        <div class="pref-actions-row">
+          <button class="btn-primary" onclick="saveUserPreferences()" id="savePrefBtn">💾 Save Preferences</button>
+          <span class="pref-save-status" id="prefSaveStatus"></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
 </main>
 
 <!-- ══════════════════════════════════════════════════════════════
@@ -1038,29 +1239,30 @@
 <!-- ══════════════════════════════════════════════════════════════
      MOBILE FIXED BOTTOM NAVIGATION
 ══════════════════════════════════════════════════════════════ -->
-<nav class="mobile-bottom-nav" aria-label="Mobile Navigation">
+<!-- Mobile Navigation Drawer footer updated -->
+<div class="mobile-bottom-nav" aria-label="Mobile Navigation">
   <button class="mob-nav-item active" id="mob-home" onclick="navTo('home')">
     <span class="mob-nav-icon">🏠</span>
     <span class="mob-nav-txt">Home</span>
   </button>
-  <button class="mob-nav-item" id="mob-menu" onclick="navTo('menu')">
-    <span class="mob-nav-icon">🍽️</span>
-    <span class="mob-nav-txt">Menu</span>
+  <button class="mob-nav-item" id="mob-explore" onclick="navTo('explore')">
+    <span class="mob-nav-icon">🔍</span>
+    <span class="mob-nav-txt">Explore</span>
   </button>
-  <button class="mob-nav-item" id="mob-track" onclick="navTo('track')">
-    <span class="mob-nav-icon">⏱️</span>
-    <span class="mob-nav-txt">Track</span>
+  <button class="mob-nav-item" id="mob-top-rated" onclick="navTo('top-rated')">
+    <span class="mob-nav-icon">⭐</span>
+    <span class="mob-nav-txt">Top Rated</span>
   </button>
-  <button class="mob-nav-item" id="mob-orders" onclick="navTo('orders')">
-    <span class="mob-nav-icon">📋</span>
-    <span class="mob-nav-txt">Orders</span>
+  <button class="mob-nav-item" id="mob-my-ratings" onclick="navTo('my-ratings')">
+    <span class="mob-nav-icon">🌟</span>
+    <span class="mob-nav-txt">My Ratings</span>
   </button>
   <button class="mob-nav-item mob-cart-item" id="mob-cart" onclick="navTo('cart')">
     <span class="mob-nav-icon">🛒</span>
     <span class="mob-nav-txt">Cart</span>
     <span class="mob-cart-badge" id="mobCartBadge">0</span>
   </button>
-</nav>
+</div>
 
 <!-- ══════════════════════════════════════════════════════════════
      FOOTER
@@ -1243,6 +1445,117 @@
           <span>Create Account &amp; Sign In</span> →
         </button>
       </form>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     FOOD DETAILS MODAL
+══════════════════════════════════════════════════════════════ -->
+<div class="modal-backdrop hidden" id="foodDetailsModalBackdrop" onclick="closeFoodDetailsModal(event)">
+  <div class="food-details-modal-box" id="foodDetailsModalBox">
+    <button class="modal-close-btn" onclick="closeFoodDetailsModal(null)" aria-label="Close food details">&times;</button>
+
+    <!-- Food Image + Header -->
+    <div class="fdm-image-wrap">
+      <img id="fdmImage" src="" alt="" class="fdm-image" onerror="this.src='/static/images/idli.jpg'" />
+      <div class="fdm-badge-overlay" id="fdmBadge"></div>
+    </div>
+
+    <div class="fdm-content">
+      <div class="fdm-header">
+        <div>
+          <h2 class="fdm-title" id="fdmTitle">Food Name</h2>
+          <span class="fdm-category" id="fdmCategory">Category</span>
+        </div>
+        <div class="fdm-price" id="fdmPrice">₹0</div>
+      </div>
+
+      <div class="fdm-meta-row">
+        <span class="fdm-prep" id="fdmPrep">⏱️ 5 min</span>
+        <span class="fdm-station" id="fdmStation">📍 Main Dish</span>
+        <span class="fdm-avail" id="fdmAvail">✅ Available</span>
+      </div>
+
+      <p class="fdm-description" id="fdmDescription"></p>
+
+      <!-- Rating Summary Bar -->
+      <div class="fdm-rating-section">
+        <div class="fdm-rating-headline">
+          <span class="fdm-rating-avg" id="fdmRatingAvg">—</span>
+          <div>
+            <div class="fdm-star-display" id="fdmStarDisplay"></div>
+            <span class="fdm-rating-count" id="fdmRatingCount">No ratings yet</span>
+          </div>
+        </div>
+
+        <!-- Distribution histogram -->
+        <div class="fdm-rating-histogram" id="fdmHistogram"></div>
+
+        <!-- User's own rating status -->
+        <div class="fdm-user-rating-wrap" id="fdmUserRatingWrap"></div>
+
+        <!-- Rate button -->
+        <div class="fdm-rate-action" id="fdmRateAction"></div>
+      </div>
+
+      <!-- Recent Reviews -->
+      <div class="fdm-reviews-section" id="fdmReviewsSection">
+        <h4 class="fdm-reviews-title">Recent Reviews</h4>
+        <div id="fdmReviewsList"></div>
+      </div>
+
+      <!-- Related Foods -->
+      <div class="fdm-related-section" id="fdmRelatedSection">
+        <h4 class="fdm-related-title">🔗 You Might Also Like</h4>
+        <div class="fdm-related-grid" id="fdmRelatedGrid"></div>
+      </div>
+
+      <!-- Add to Cart -->
+      <div class="fdm-cart-action">
+        <button class="btn-primary btn-lg" id="fdmAddToCartBtn" onclick="fdmAddToCart()">+ Add to Cart</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     RATE FOOD MODAL
+══════════════════════════════════════════════════════════════ -->
+<div class="modal-backdrop hidden" id="rateFoodModalBackdrop" onclick="closeRateModal(event)">
+  <div class="rate-modal-box">
+    <div class="modal-header">
+      <h3 class="modal-title" id="rateModalTitle">⭐ Rate This Dish</h3>
+      <button class="modal-close-btn" onclick="closeRateModal(null)">&times;</button>
+    </div>
+
+    <div class="rate-food-preview">
+      <img class="rate-food-img" id="rateFoodImg" src="" alt="" onerror="this.src='/static/images/idli.jpg'" />
+      <div>
+        <div class="rate-food-name" id="rateFoodName"></div>
+        <div class="rate-food-category" id="rateFoodCategory"></div>
+      </div>
+    </div>
+
+    <!-- Star Selector -->
+    <div class="star-selector" id="starSelector">
+      <button class="star-btn" data-value="1" onclick="selectRatingStar(1)" aria-label="Rate 1 star">★</button>
+      <button class="star-btn" data-value="2" onclick="selectRatingStar(2)" aria-label="Rate 2 stars">★</button>
+      <button class="star-btn" data-value="3" onclick="selectRatingStar(3)" aria-label="Rate 3 stars">★</button>
+      <button class="star-btn" data-value="4" onclick="selectRatingStar(4)" aria-label="Rate 4 stars">★</button>
+      <button class="star-btn" data-value="5" onclick="selectRatingStar(5)" aria-label="Rate 5 stars">★</button>
+    </div>
+    <div class="star-label" id="starLabel">Tap a star to rate</div>
+
+    <!-- Review text -->
+    <div class="rate-review-wrap">
+      <label for="rateReviewInput" class="rate-review-label">Write a short review (optional):</label>
+      <textarea id="rateReviewInput" class="rate-review-input" rows="3" maxlength="300" placeholder="e.g. Crispy and perfect with sambar..."></textarea>
+    </div>
+
+    <div class="rate-modal-actions">
+      <button class="btn-secondary" onclick="closeRateModal(null)">Cancel</button>
+      <button class="btn-primary" id="submitRatingBtn" onclick="submitRating()">Submit Rating</button>
     </div>
   </div>
 </div>

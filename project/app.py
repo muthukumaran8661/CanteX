@@ -42,6 +42,17 @@ from database import (
     get_user_by_id,
     OutOfStockError,
     InvalidOrderStateError,
+    save_food_rating,
+    get_user_food_rating,
+    get_user_ratings,
+    delete_food_rating,
+    get_food_rating_summary,
+    get_all_food_ratings_summary,
+    get_top_rated_foods,
+    get_food_details,
+    save_user_preferences,
+    get_user_preferences,
+    get_recommendation_admin_metrics,
 )
 from services import (
     OrderService,
@@ -369,15 +380,74 @@ def sse_events():
     )
 
 
-# ── Menu & Catalog ────────────────────────────────────────────────────────
+# ── Menu & Food Catalog ───────────────────────────────────────────────────
 
 @app.route("/api/menu", methods=["GET"])
+@app.route("/api/food", methods=["GET"])
 def get_menu():
     """
-    GET /api/menu
-    Return full list of food items with live stock, prep time, station info.
+    GET /api/menu or GET /api/food
+    Return full list of food items with live stock, prep time, station info,
+    and genuine rating summaries (average rating, count, user's rating).
     """
-    return jsonify(OrderService.get_menu())
+    items = OrderService.get_menu()
+    ratings_map = get_all_food_ratings_summary()
+    current_user = get_current_user()
+    user_ratings = {}
+    if current_user:
+        for r in get_user_ratings(current_user["id"]):
+            user_ratings[r["food_id"]] = r["rating"]
+
+    for it in items:
+        fid = it["id"]
+        r_info = ratings_map.get(fid, {"average_rating": None, "rating_count": 0})
+        it["average_rating"] = r_info["average_rating"]
+        it["rating_count"] = r_info["rating_count"]
+        it["is_available"] = it.get("stock", 0) > 0
+        it["user_rating"] = user_ratings.get(fid)
+
+    return jsonify(items)
+
+
+@app.route("/api/food/<int:food_id>", methods=["GET"])
+def get_food_item_detail(food_id: int):
+    """
+    GET /api/food/<food_id>
+    Return detailed information for a single food item including
+    complete rating summary, reviews, user's own rating, and CF related foods.
+    """
+    current_user = get_current_user()
+    user_id = current_user.get("id") if current_user else None
+    food = get_food_details(food_id=food_id, user_id=user_id)
+    if not food:
+        return jsonify({"success": False, "message": "Food item not found."}), 404
+
+    # Attach Item-to-Item CF related foods
+    food["related_foods"] = RecommendationService.get_related_foods(food_id=food_id, limit=4)
+    return jsonify({"success": True, "food": food}), 200
+
+
+@app.route("/api/food/<int:food_id>/related", methods=["GET"])
+def get_related_food_items(food_id: int):
+    """
+    GET /api/food/<food_id>/related
+    Return related food items based on Item-to-Item Collaborative Filtering.
+    """
+    limit = int(request.args.get("limit", 4))
+    related = RecommendationService.get_related_foods(food_id=food_id, limit=limit)
+    return jsonify({"success": True, "food_id": food_id, "related": related}), 200
+
+
+@app.route("/api/food/top-rated", methods=["GET"])
+def get_top_rated_foods_endpoint():
+    """
+    GET /api/food/top-rated
+    Return top rated foods ranked using Bayesian rating score.
+    """
+    limit = int(request.args.get("limit", 10))
+    min_ratings = int(request.args.get("min_ratings", 1))
+    top_foods = get_top_rated_foods(limit=limit, min_ratings=min_ratings)
+    return jsonify({"success": True, "top_rated": top_foods}), 200
 
 
 # ── Checkout / Atomic Order Creation ──────────────────────────────────────
@@ -677,9 +747,18 @@ def reset_inventory(item_id: int):
 def admin_metrics():
     """
     GET /api/admin/metrics
-    Protected admin endpoint returning real-time aggregated metrics.
+    Protected admin endpoint returning real-time aggregated metrics including
+    canteen order operations and recommendation/ratings analytics.
     """
-    return jsonify(get_admin_metrics()), 200
+    metrics = get_admin_metrics()
+    try:
+        rec_metrics = get_recommendation_admin_metrics()
+        rec_insights = RecommendationService.get_admin_insights()
+        metrics["recommendations"] = rec_metrics
+        metrics["recommendation_insights"] = rec_insights
+    except Exception as e:
+        metrics["recommendations_error"] = str(e)
+    return jsonify(metrics), 200
 
 
 @app.route("/api/admin/users", methods=["GET"])
@@ -826,6 +905,175 @@ def admin_evaluate_recommendations():
     try:
         results = RecommendationService.evaluate_offline_ranking(k=k)
         return jsonify(results), 200
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+
+# ── Ratings & Reviews API Endpoints ──────────────────────────────────────
+
+@app.route("/api/ratings/me", methods=["GET"])
+@login_required
+def get_my_ratings():
+    """
+    GET /api/ratings/me
+    Return all food ratings submitted by the authenticated user.
+    """
+    current_user = get_current_user()
+    ratings = get_user_ratings(current_user["id"])
+    return jsonify({"success": True, "ratings": ratings}), 200
+
+
+@app.route("/api/ratings", methods=["POST"])
+@login_required
+def submit_food_rating():
+    """
+    POST /api/ratings
+    Submit or update a rating (1-5 stars, optional review).
+    Enforces exactly 1 active rating per user per food item via database UPSERT.
+    """
+    current_user = get_current_user()
+    data = request.get_json(silent=True) or {}
+
+    food_id = data.get("food_id")
+    rating = data.get("rating")
+    review = data.get("review")
+
+    if food_id is None:
+        return jsonify({"success": False, "message": "food_id is required."}), 400
+
+    try:
+        food_id = int(food_id)
+    except (ValueError, TypeError):
+        return jsonify({"success": False, "message": "food_id must be a valid integer."}), 400
+
+    if rating is None:
+        return jsonify({"success": False, "message": "rating is required."}), 400
+
+    try:
+        rating_val = int(rating)
+    except (ValueError, TypeError):
+        return jsonify({"success": False, "message": "rating must be an integer between 1 and 5."}), 400
+
+    if rating_val < 1 or rating_val > 5:
+        return jsonify({"success": False, "message": "rating must be between 1 and 5 stars."}), 400
+
+    try:
+        saved = save_food_rating(
+            user_id=current_user["id"],
+            food_id=food_id,
+            rating=rating_val,
+            review=str(review).strip() if review else None,
+        )
+        return jsonify({
+            "success": True,
+            "rating": saved,
+            "message": "Thank you! Your rating has been recorded.",
+        }), 200
+    except ValueError as ve:
+        return jsonify({"success": False, "message": str(ve)}), 400
+    except Exception as e:
+        return jsonify({"success": False, "message": f"Failed to save rating: {str(e)}"}), 500
+
+
+@app.route("/api/ratings/<int:rating_id>", methods=["PUT"])
+@login_required
+def update_food_rating(rating_id: int):
+    """
+    PUT /api/ratings/<rating_id>
+    Update an existing rating. Enforces that rating belongs to current user.
+    """
+    current_user = get_current_user()
+    data = request.get_json(silent=True) or {}
+    food_id = data.get("food_id")
+    rating = data.get("rating")
+    review = data.get("review")
+
+    # If food_id is not supplied in body, verify rating ownership from existing ratings
+    if not food_id:
+        user_ratings = get_user_ratings(current_user["id"])
+        target = next((r for r in user_ratings if r["id"] == rating_id), None)
+        if not target:
+            return jsonify({"success": False, "message": "Rating not found or access denied."}), 404
+        food_id = target["food_id"]
+
+    try:
+        rating_val = int(rating)
+        if rating_val < 1 or rating_val > 5:
+            return jsonify({"success": False, "message": "Rating must be between 1 and 5."}), 400
+    except (ValueError, TypeError):
+        return jsonify({"success": False, "message": "Valid integer rating (1-5) is required."}), 400
+
+    try:
+        saved = save_food_rating(
+            user_id=current_user["id"],
+            food_id=int(food_id),
+            rating=rating_val,
+            review=str(review).strip() if review else None,
+        )
+        return jsonify({"success": True, "rating": saved, "message": "Rating updated successfully."}), 200
+    except ValueError as ve:
+        return jsonify({"success": False, "message": str(ve)}), 400
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+
+@app.route("/api/ratings/<int:rating_id>", methods=["DELETE"])
+@login_required
+def delete_rating_endpoint(rating_id: int):
+    """
+    DELETE /api/ratings/<rating_id>
+    Delete a user's own rating. Enforces ownership strictly.
+    """
+    current_user = get_current_user()
+    deleted = delete_food_rating(user_id=current_user["id"], rating_id=rating_id)
+    if not deleted:
+        return jsonify({"success": False, "message": "Rating not found or access denied."}), 404
+
+    return jsonify({"success": True, "message": "Rating removed successfully."}), 200
+
+
+# ── User Preferences & Cold-Start Onboarding ─────────────────────────────
+
+@app.route("/api/user/preferences", methods=["GET"])
+@login_required
+def get_preferences_endpoint():
+    """
+    GET /api/user/preferences
+    Return taste profile and dietary preferences for current user.
+    """
+    current_user = get_current_user()
+    prefs = get_user_preferences(current_user["id"])
+    return jsonify({"success": True, "preferences": prefs}), 200
+
+
+@app.route("/api/user/preferences", methods=["POST"])
+@login_required
+def save_preferences_endpoint():
+    """
+    POST /api/user/preferences
+    Save or update taste preferences (categories, dietary) for cold-start recommendations.
+    """
+    current_user = get_current_user()
+    data = request.get_json(silent=True) or {}
+    categories = data.get("preferred_categories", [])
+    if not isinstance(categories, list):
+        categories = []
+
+    dietary = data.get("dietary_preference", "ALL")
+    if dietary not in ("ALL", "VEG", "NON_VEG"):
+        dietary = "ALL"
+
+    try:
+        saved = save_user_preferences(
+            user_id=current_user["id"],
+            preferred_categories=categories,
+            dietary_preference=dietary,
+        )
+        return jsonify({
+            "success": True,
+            "preferences": saved,
+            "message": "Preferences saved successfully.",
+        }), 200
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 

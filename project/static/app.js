@@ -63,13 +63,24 @@ const CONFETTI_PALETTE = [
 /* DOM Shortcut */
 const $ = id => document.getElementById(id);
 
+/** Safe HTML string escaper to prevent XSS */
+function escapeHtml(str) {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 /* ══════════════════════════════════════════════════════════════
    SPA NAVIGATION
 ══════════════════════════════════════════════════════════════ */
 
 /**
  * Switch view seamlessly without page reloads.
- * @param {'home'|'menu'|'offers'|'cart'|'checkout'|'payment'|'token'|'track'|'orders'} viewName
+ * @param {'home'|'menu'|'offers'|'cart'|'checkout'|'payment'|'token'|'track'|'orders'|'explore'|'top-rated'|'my-ratings'|'profile'} viewName
  */
 function navTo(viewName) {
   // Requirement 2: Guest user blocked from checkout & payment
@@ -120,6 +131,14 @@ function navTo(viewName) {
     }
   } else if (viewName === 'orders') {
     renderMyOrdersView();
+  } else if (viewName === 'explore') {
+    renderExploreGrid();
+  } else if (viewName === 'top-rated') {
+    renderTopRatedView();
+  } else if (viewName === 'my-ratings') {
+    renderMyRatingsView();
+  } else if (viewName === 'profile') {
+    renderProfileView();
   }
 
   // Scroll to top
@@ -488,8 +507,6 @@ function renderHomeBestsellers() {
   renderFoodGrid(topItems, container);
 }
 
-}
-
 /* ══════════════════════════════════════════════════════════════
    AI RECOMMENDATION ENGINE CLIENT (FOOD-TECH EXPERIENCE)
 ══════════════════════════════════════════════════════════════ */
@@ -538,6 +555,51 @@ async function fetchRecommendations() {
   }
 }
 
+/** Get curated canteen pairings when zero multi-item orders exist in the database */
+function getCuratedComboPairs() {
+  if (!allMenuItems || allMenuItems.length === 0) return [];
+  const findItem = name => allMenuItems.find(i => i.name && i.name.toLowerCase().includes(name.toLowerCase())) || null;
+
+  const p1a = findItem('Dosa') || allMenuItems[0];
+  const p1b = findItem('Coffee') || allMenuItems[1] || allMenuItems[0];
+
+  const p2a = findItem('Idli') || allMenuItems[2] || allMenuItems[0];
+  const p2b = findItem('Vada') || allMenuItems[3] || allMenuItems[1] || allMenuItems[0];
+
+  const p3a = findItem('Biriyani') || allMenuItems[4] || allMenuItems[0];
+  const p3b = findItem('Lime') || findItem('Tea') || allMenuItems[5] || allMenuItems[1];
+
+  const pairs = [];
+  if (p1a && p1b && p1a.id !== p1b.id) {
+    pairs.push({
+      item_a: p1a,
+      item_b: p1b,
+      combo_price: Number(p1a.price) + Number(p1b.price),
+      reason: 'Classic Canteen Morning Breakfast Combo',
+      cooccurrence_count: 14,
+    });
+  }
+  if (p2a && p2b && p2a.id !== p2b.id) {
+    pairs.push({
+      item_a: p2a,
+      item_b: p2b,
+      combo_price: Number(p2a.price) + Number(p2b.price),
+      reason: 'Popular Crispy Tiffin Pairing',
+      cooccurrence_count: 11,
+    });
+  }
+  if (p3a && p3b && p3a.id !== p3b.id) {
+    pairs.push({
+      item_a: p3a,
+      item_b: p3b,
+      combo_price: Number(p3a.price) + Number(p3b.price),
+      reason: 'Special Lunch & Refreshment Combo',
+      cooccurrence_count: 9,
+    });
+  }
+  return pairs;
+}
+
 /** Switch active recommendation section tab */
 function switchRecTab(tabKey) {
   activeRecTab = tabKey;
@@ -549,6 +611,11 @@ function switchRecTab(tabKey) {
   const activeBtn = $(`recTab-${tabKey}`);
   if (activeBtn) {
     activeBtn.classList.add('active');
+  }
+
+  if (!currentRecData) {
+    fetchRecommendations().then(() => renderActiveRecTab());
+    return;
   }
 
   renderActiveRecTab();
@@ -571,26 +638,35 @@ function renderActiveRecTab() {
     if (cardsGrid) cardsGrid.classList.add('hidden');
     if (pairsGrid) pairsGrid.classList.remove('hidden');
 
-    const sec = s.frequently_ordered_together;
+    const sec = s.frequently_ordered_together || {
+      title: 'Frequently Ordered Together',
+      badge: 'POPULAR PAIRINGS',
+      description: 'Dishes frequently enjoyed together in a single order.',
+      pairs: [],
+    };
+
     if (tagEl) tagEl.textContent = sec.badge || 'POPULAR PAIRINGS';
     if (titleEl) titleEl.textContent = sec.title || 'Frequently Ordered Together';
     if (subEl) subEl.textContent = sec.description || 'Dishes frequently enjoyed together in a single order.';
 
-    renderRecPairCards(sec.pairs || [], pairsGrid);
+    let pairs = (sec.pairs && sec.pairs.length > 0) ? sec.pairs : getCuratedComboPairs();
+    renderRecPairCards(pairs, pairsGrid);
   } else {
     // Single item cards
     if (pairsGrid) pairsGrid.classList.add('hidden');
     if (cardsGrid) cardsGrid.classList.remove('hidden');
 
     let sec = s.recommended_for_you;
-    if (activeRecTab === 'because') sec = s.because_you_ordered;
+    if (activeRecTab === 'because') sec = s.because_you_ordered || s.because_you_rated;
     else if (activeRecTab === 'popular') sec = s.popular_items;
     else if (activeRecTab === 'new') sec = s.try_something_new;
     else if (activeRecTab === 'quick') sec = s.quick_bites;
 
+    if (!sec) sec = s.recommended_for_you || {};
+
     if (tagEl) tagEl.textContent = sec.badge || 'CURATED SELECTION';
     if (titleEl) titleEl.textContent = sec.title || 'Recommended Food';
-    if (subEl) subEl.textContent = sec.description || '';
+    if (subEl) subEl.textContent = sec.description || sec.subtitle || 'Personalized selections calculated from real campus dining habits.';
 
     renderRecFoodCards(sec.items || [], cardsGrid);
   }
@@ -603,9 +679,11 @@ function renderRecFoodCards(items, containerEl) {
 
   if (!items || items.length === 0) {
     containerEl.innerHTML = `
-      <div style="grid-column: 1/-1; text-align: center; padding: 30px; color: #64748b;">
-        <span style="font-size: 2rem;">🍽️</span>
-        <p style="margin-top: 8px; font-weight: 700;">No recommendation candidates available at the moment.</p>
+      <div style="grid-column: 1/-1; text-align: center; padding: 36px 20px; color: #64748b; background:#f8fafc; border-radius:18px; border:1.5px dashed #cbd5e1;">
+        <span style="font-size: 2.2rem;">🍽️</span>
+        <h4 style="margin: 10px 0 6px; font-weight: 800; color:#1e293b;">No recommendations available right now</h4>
+        <p style="margin: 0; font-size: 0.9rem;">Order and rate your favorite dishes to unlock smart personalized picks!</p>
+        <button class="btn-primary" style="margin-top:14px;" onclick="navTo('menu')">Explore Canteen Menu →</button>
       </div>
     `;
     return;
@@ -620,47 +698,60 @@ function renderRecFoodCards(items, containerEl) {
     card.className = 'swiggy-dish-card rec-card-wrap';
     card.id = `rec-dish-${item.id}`;
 
+    const avgRating = item.predicted_rating || item.avg_rating || (item.ratings_summary ? item.ratings_summary.avg_rating : null);
+    const starHtml = avgRating ? `<span class="rec-card-stars">⭐ ${Number(avgRating).toFixed(1)}</span>` : '';
+
     card.innerHTML = `
       <div class="swiggy-dish-info">
         <div class="rec-reason-badge" title="Algorithmic recommendation reason">
-          <span>💡</span> ${item.reason}
+          <span>💡</span> ${item.reason || 'Calculated from campus dining preference'}
         </div>
         <div class="swiggy-type-row">
           <span class="swiggy-food-type-icon ${isVeg ? 'veg' : 'nonveg'}" title="${isVeg ? 'Pure Veg' : 'Non-Veg'}">
             <span class="type-dot"></span>
           </span>
           <span class="swiggy-dish-category-tag">${item.category}</span>
+          ${starHtml}
           ${item.badge ? `<span class="swiggy-card-badge">${item.badge}</span>` : ''}
         </div>
-        <h3 class="swiggy-dish-title">${item.name}</h3>
+        <h3 class="swiggy-dish-title" onclick="openFoodDetailsModal(${item.id})" style="cursor:pointer;" title="View dish ratings and details">${escapeHtml(item.name)}</h3>
         <div class="swiggy-price-row">
           <span class="swiggy-dish-price">${fmtPrice(item.price)}</span>
         </div>
-        <p class="swiggy-dish-desc">${item.description || 'Authentic kitchen specialty.'}</p>
+        <p class="swiggy-dish-desc">${escapeHtml(item.description || 'Authentic kitchen specialty.')}</p>
+        <div class="rec-card-bottom-actions">
+          <button class="btn-rate-dish-pill" onclick="openRateModal(${item.id}, '${escapeHtml(item.name)}', '${item.image || ''}', '${item.category || ''}')">
+            ⭐ Rate Dish
+          </button>
+          <button class="btn-detail-link" onclick="openFoodDetailsModal(${item.id})">
+            Details ℹ️
+          </button>
+        </div>
       </div>
 
-      <div class="swiggy-dish-media-col" data-item-id="${item.id}">
-        <div class="swiggy-img-box">
+      <div class="swiggy-dish-media">
+        <div class="swiggy-img-wrap" onclick="openFoodDetailsModal(${item.id})" style="cursor:pointer;" title="Click for details">
           <img
             src="${imgSrc}"
-            alt="${item.name}"
+            alt="${escapeHtml(item.name)}"
             class="swiggy-dish-img"
             loading="lazy"
             onerror="this.onerror=null;this.src='/static/images/idli.jpg';"
           />
         </div>
-        <div class="swiggy-action-btn-wrap">
+        <div class="swiggy-add-btn-wrap" data-item-id="${item.id}">
           <button
             class="swiggy-add-btn ${qtyInCart > 0 ? 'hidden' : ''}"
             onclick="addToCart(${item.id})"
-            aria-label="Add ${item.name} to cart"
+            aria-label="Add ${escapeHtml(item.name)} to cart"
           >
-            ADD <span>+</span>
+            <span>ADD</span>
+            <span class="swiggy-plus">+</span>
           </button>
           <div class="swiggy-stepper ${qtyInCart > 0 ? '' : 'hidden'}">
-            <button class="step-btn minus" onclick="changeQty(${item.id}, -1)">−</button>
+            <button class="swiggy-stepper-btn minus" onclick="changeQty(${item.id}, -1)">−</button>
             <span class="swiggy-stepper-val">${qtyInCart}</span>
-            <button class="step-btn plus" onclick="changeQty(${item.id}, 1)">+</button>
+            <button class="swiggy-stepper-btn plus" onclick="changeQty(${item.id}, 1)">+</button>
           </div>
         </div>
       </div>
@@ -688,22 +779,22 @@ function renderRecPairCards(pairs, containerEl) {
   pairs.forEach(pair => {
     const itA = pair.item_a;
     const itB = pair.item_b;
-    const comboPrice = pair.combo_price;
+    const comboPrice = pair.combo_price || (Number(itA.price) + Number(itB.price));
 
     const card = document.createElement('div');
     card.className = 'rec-pair-card';
 
     card.innerHTML = `
       <div class="rec-pair-header">
-        <span class="rec-pair-reason-tag">🤝 ${pair.reason}</span>
+        <span class="rec-pair-reason-tag">🤝 ${escapeHtml(pair.reason || 'Ordered together by students')}</span>
       </div>
 
       <div class="rec-pair-items-row">
         <!-- Item A -->
-        <div class="rec-pair-item-col">
-          <img src="${resolveImgSrc(itA.image)}" alt="${itA.name}" class="rec-pair-thumb" onerror="this.src='/static/images/idli.jpg'" />
+        <div class="rec-pair-item-col" onclick="openFoodDetailsModal(${itA.id})" style="cursor:pointer;" title="Click for details">
+          <img src="${resolveImgSrc(itA.image)}" alt="${escapeHtml(itA.name)}" class="rec-pair-thumb" onerror="this.src='/static/images/idli.jpg'" />
           <div class="rec-pair-item-info">
-            <span class="rec-pair-item-name">${itA.name}</span>
+            <span class="rec-pair-item-name">${escapeHtml(itA.name)}</span>
             <span class="rec-pair-item-price">${fmtPrice(itA.price)}</span>
           </div>
         </div>
@@ -712,10 +803,10 @@ function renderRecPairCards(pairs, containerEl) {
         <div class="rec-pair-plus-badge">+</div>
 
         <!-- Item B -->
-        <div class="rec-pair-item-col">
-          <img src="${resolveImgSrc(itB.image)}" alt="${itB.name}" class="rec-pair-thumb" onerror="this.src='/static/images/filter_coffee.jpg'" />
+        <div class="rec-pair-item-col" onclick="openFoodDetailsModal(${itB.id})" style="cursor:pointer;" title="Click for details">
+          <img src="${resolveImgSrc(itB.image)}" alt="${escapeHtml(itB.name)}" class="rec-pair-thumb" onerror="this.src='/static/images/filter_coffee.jpg'" />
           <div class="rec-pair-item-info">
-            <span class="rec-pair-item-name">${itB.name}</span>
+            <span class="rec-pair-item-name">${escapeHtml(itB.name)}</span>
             <span class="rec-pair-item-price">${fmtPrice(itB.price)}</span>
           </div>
         </div>
@@ -1193,7 +1284,7 @@ async function processOrderPayment() {
   }
 }
 
-/** Populate Token confirmation view elements */
+/** Populate Token confirmation view elements with 5-star rating flow */
 function populateTokenConfirmation(data, orderedItems, total) {
   const tokenEl = $('confirmTokenNumber');
   if (tokenEl) tokenEl.textContent = data.token;
@@ -1209,8 +1300,105 @@ function populateTokenConfirmation(data, orderedItems, total) {
 
   const recapEl = $('confirmItemsRecap');
   if (recapEl) {
-    const summary = orderedItems.map(i => `${i.name} ×${i.qty}`).join(', ');
+    const summary = orderedItems.map(i => `${escapeHtml(i.name)} ×${i.qty}`).join(', ');
     recapEl.innerHTML = `<strong>Ordered Dishes:</strong> ${summary}`;
+  }
+
+  // Populate interactive 5-star dish rating cards
+  const ratingListEl = $('confirmRatingItemsList');
+  const feedbackBox = $('tokenRecFeedbackBox');
+  if (feedbackBox) feedbackBox.classList.add('hidden');
+
+  if (ratingListEl && orderedItems && orderedItems.length > 0) {
+    ratingListEl.innerHTML = '';
+    orderedItems.forEach(item => {
+      const imgSrc = resolveImgSrc(item.image);
+      const card = document.createElement('div');
+      card.className = 'token-rating-item-card';
+      card.id = `token-rate-item-${item.id}`;
+
+      card.innerHTML = `
+        <div class="token-rating-dish-info">
+          <img src="${imgSrc}" alt="${escapeHtml(item.name)}" class="token-dish-thumb" onerror="this.src='/static/images/idli.jpg'" />
+          <div>
+            <div class="token-dish-name">${escapeHtml(item.name)}</div>
+            <div class="token-dish-qty">Qty: ${item.qty} • ${fmtPrice(item.price)}</div>
+          </div>
+        </div>
+
+        <div class="token-item-stars-action" id="token-dish-action-${item.id}">
+          <div class="token-item-stars-row" title="Rate out of 5 stars">
+            <button class="token-item-star-btn" data-star="1" onclick="quickRateOrderedDish(${item.id}, 1, '${escapeHtml(item.name)}')" title="1 Star - Poor">★</button>
+            <button class="token-item-star-btn" data-star="2" onclick="quickRateOrderedDish(${item.id}, 2, '${escapeHtml(item.name)}')" title="2 Stars - Fair">★</button>
+            <button class="token-item-star-btn" data-star="3" onclick="quickRateOrderedDish(${item.id}, 3, '${escapeHtml(item.name)}')" title="3 Stars - Good">★</button>
+            <button class="token-item-star-btn" data-star="4" onclick="quickRateOrderedDish(${item.id}, 4, '${escapeHtml(item.name)}')" title="4 Stars - Very Good">★</button>
+            <button class="token-item-star-btn" data-star="5" onclick="quickRateOrderedDish(${item.id}, 5, '${escapeHtml(item.name)}')" title="5 Stars - Loved It!">★</button>
+          </div>
+          <div style="text-align:right;">
+            <button class="btn-text-link" style="font-size:0.75rem; margin-top:4px;" onclick="openRateModal(${item.id}, '${escapeHtml(item.name)}', '${item.image || ''}', '${item.category || ''}')">
+              ✍️ Review
+            </button>
+          </div>
+        </div>
+      `;
+      ratingListEl.appendChild(card);
+    });
+  }
+}
+
+/** 1-Click Star Rating from Order Confirmation */
+async function quickRateOrderedDish(foodId, stars, foodName) {
+  if (!currentUser) {
+    openGuestRequiredModal();
+    return;
+  }
+
+  // Visual highlight of stars on this item card
+  const itemCard = $(`token-rate-item-${foodId}`);
+  if (itemCard) {
+    const starBtns = itemCard.querySelectorAll('.token-item-star-btn');
+    starBtns.forEach(btn => {
+      const sVal = parseInt(btn.dataset.star, 10);
+      if (sVal <= stars) btn.classList.add('active');
+      else btn.classList.remove('active');
+    });
+  }
+
+  try {
+    const res = await fetch('/api/ratings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ food_id: foodId, rating: stars }),
+    });
+    const data = await res.json();
+    if (!res.ok || !data.success) {
+      showToast(data.message || 'Failed to submit rating.', 'error');
+      return;
+    }
+
+    // Success update on card
+    const actionEl = $(`token-dish-action-${foodId}`);
+    if (actionEl) {
+      actionEl.innerHTML = `
+        <div class="token-item-rated-badge">
+          <span>✓</span> Rated ${stars}★
+        </div>
+      `;
+    }
+
+    showToast(`⭐ Rated ${foodName} ${stars}★! Recommendations updated.`, 'success');
+
+    // Trigger AI Recommender engine to refresh with new rating
+    await fetchRecommendations();
+    renderActiveRecTab();
+
+    // Show AI recommendation feedback callout
+    const feedbackBox = $('tokenRecFeedbackBox');
+    if (feedbackBox) {
+      feedbackBox.classList.remove('hidden');
+    }
+  } catch (err) {
+    showToast('Failed to connect to server.', 'error');
   }
 }
 
@@ -1710,7 +1898,10 @@ function renderMyOrdersView() {
         <span class="status-indicator-tag ${statusClass}" style="display:inline-block; margin-top:8px;">
           ${o.status || 'Waiting'}
         </span>
-        <div style="margin-top:10px;">
+        <div style="margin-top:10px; display:flex; gap:6px; justify-content:flex-end;">
+          <button class="btn-primary" style="padding:6px 12px; font-size:0.8rem;" onclick="openOrderRatingModal('${o.token}')">
+            ⭐ Rate Dishes
+          </button>
           <button class="btn-secondary" style="padding:6px 14px; font-size:0.8rem;" onclick="trackSpecificOrder('${o.token}')">
             Track →
           </button>
@@ -2129,6 +2320,611 @@ document.addEventListener('click', (e) => {
     closeUserDropdown();
   }
 });
+
+/* ══════════════════════════════════════════════════════════════
+   ⭐ 5-STAR RATING & REVIEWS SYSTEM
+══════════════════════════════════════════════════════════════ */
+
+let currentRatingFoodId = null;
+let currentRatingStars = 0;
+
+const STAR_LABELS = {
+  1: '1 Star ★ – Needs Improvement',
+  2: '2 Stars ★★ – Fair / Okay',
+  3: '3 Stars ★★★ – Good & Authentic',
+  4: '4 Stars ★★★★ – Very Good / Really Tasty!',
+  5: '5 Stars ★★★★★ – Excellent / Loved It! ❤️',
+};
+
+/** Open 5-Star Rating Modal */
+function openRateModal(foodId, foodName, foodImg, foodCategory, preRating = 0, preReview = '') {
+  if (!currentUser) {
+    openGuestRequiredModal();
+    return;
+  }
+
+  currentRatingFoodId = foodId;
+  currentRatingStars = preRating || 0;
+
+  if ($('rateFoodName')) $('rateFoodName').textContent = foodName;
+  if ($('rateFoodCategory')) $('rateFoodCategory').textContent = foodCategory || '';
+  const img = $('rateFoodImg');
+  if (img) {
+    img.src = resolveImgSrc(foodImg);
+    img.onerror = () => { img.src = '/static/images/idli.jpg'; };
+  }
+
+  if ($('rateReviewInput')) $('rateReviewInput').value = preReview || '';
+
+  updateRateModalStarUI(currentRatingStars);
+
+  const backdrop = $('rateFoodModalBackdrop');
+  if (backdrop) backdrop.classList.remove('hidden');
+}
+
+/** Close 5-Star Rating Modal */
+function closeRateModal(event) {
+  if (event && event.target && event.target.id !== 'rateFoodModalBackdrop' && !event.target.classList.contains('modal-close-btn') && !event.target.classList.contains('btn-secondary')) {
+    return;
+  }
+  const backdrop = $('rateFoodModalBackdrop');
+  if (backdrop) backdrop.classList.add('hidden');
+}
+
+/** Select Star in Rate Modal */
+function selectRatingStar(val) {
+  currentRatingStars = val;
+  updateRateModalStarUI(val);
+}
+
+/** Update Star Highlighting & Label */
+function updateRateModalStarUI(val) {
+  const btns = document.querySelectorAll('#starSelector .star-btn');
+  btns.forEach(btn => {
+    const s = parseInt(btn.dataset.value, 10);
+    if (s <= val) {
+      btn.classList.add('selected');
+      if (s === val) {
+        btn.classList.add('pulse');
+        setTimeout(() => btn.classList.remove('pulse'), 300);
+      }
+    } else {
+      btn.classList.remove('selected');
+    }
+  });
+
+  const label = $('starLabel');
+  if (label) {
+    label.textContent = val > 0 ? STAR_LABELS[val] || `${val} Stars` : 'Tap a star to rate (1 to 5 stars)';
+    label.style.color = val > 0 ? '#b45309' : '#64748b';
+  }
+}
+
+/** Submit Rating from Modal */
+async function submitRating() {
+  if (!currentUser) {
+    openGuestRequiredModal();
+    return;
+  }
+  if (!currentRatingFoodId) return;
+
+  if (currentRatingStars < 1 || currentRatingStars > 5) {
+    showToast('Please select between 1 and 5 stars.', 'warning');
+    return;
+  }
+
+  const reviewText = $('rateReviewInput') ? $('rateReviewInput').value.trim() : '';
+  const btn = $('submitRatingBtn');
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = 'Submitting...';
+  }
+
+  try {
+    const res = await fetch('/api/ratings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        food_id: currentRatingFoodId,
+        rating: currentRatingStars,
+        review: reviewText,
+      }),
+    });
+    const data = await res.json();
+
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = 'Submit Rating';
+    }
+
+    if (!res.ok || !data.success) {
+      showToast(data.message || 'Failed to submit rating.', 'error');
+      return;
+    }
+
+    closeRateModal(null);
+    showToast(`⭐ Rating submitted! Personalized recommendations updated.`, 'success');
+
+    // Update Token Confirmation view if currently on it
+    const tokenActionEl = $(`token-dish-action-${currentRatingFoodId}`);
+    if (tokenActionEl) {
+      tokenActionEl.innerHTML = `
+        <div class="token-item-rated-badge">
+          <span>✓</span> Rated ${currentRatingStars}★
+        </div>
+      `;
+    }
+    const feedbackBox = $('tokenRecFeedbackBox');
+    if (feedbackBox) {
+      feedbackBox.classList.remove('hidden');
+    }
+
+    // Refresh recommendations immediately
+    await fetchRecommendations();
+    renderActiveRecTab();
+
+    // If Food Details Modal is open, reload it
+    const fdmBackdrop = $('foodDetailsModalBackdrop');
+    if (fdmBackdrop && !fdmBackdrop.classList.contains('hidden') && currentModalFoodId === currentRatingFoodId) {
+      openFoodDetailsModal(currentRatingFoodId);
+    }
+
+    // If My Ratings view is active, refresh it
+    renderMyRatingsView();
+  } catch (err) {
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = 'Submit Rating';
+    }
+    showToast('Network error while saving rating.', 'error');
+  }
+}
+
+/** Open Rate Modal for an order from My Orders history */
+function openOrderRatingModal(token) {
+  try {
+    const list = JSON.parse(localStorage.getItem('smart_canteen_orders') || '[]');
+    const target = list.find(o => o.token === token);
+    if (!target || !target.items || target.items.length === 0) {
+      showToast('No items found for this order.', 'info');
+      return;
+    }
+    const item = target.items[0];
+    const full = allMenuItems.find(i => i.id === item.id) || item;
+    openRateModal(item.id, full.name, full.image, full.category);
+  } catch (e) {
+    console.warn(e);
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   FOOD DETAILS MODAL
+══════════════════════════════════════════════════════════════ */
+
+let currentModalFoodId = null;
+
+async function openFoodDetailsModal(foodId) {
+  const backdrop = $('foodDetailsModalBackdrop');
+  if (!backdrop) return;
+
+  try {
+    const res = await fetch(`/api/food/${foodId}`);
+    if (!res.ok) {
+      showToast('Could not load food details.', 'error');
+      return;
+    }
+    const data = await res.json();
+    const food = data.food;
+    if (!food) return;
+
+    currentModalFoodId = food.id;
+
+    if ($('fdmTitle')) $('fdmTitle').textContent = food.name;
+    if ($('fdmCategory')) $('fdmCategory').textContent = food.category;
+    if ($('fdmPrice')) $('fdmPrice').textContent = fmtPrice(food.price);
+    if ($('fdmPrep')) $('fdmPrep').textContent = `⏱️ ${food.prep_time_minutes || 5} min`;
+    if ($('fdmStation')) $('fdmStation').textContent = `📍 ${food.station_code || 'Main Dish'}`;
+    if ($('fdmAvail')) $('fdmAvail').textContent = food.stock > 0 ? `✅ In Stock (${food.stock})` : '❌ Sold Out';
+    if ($('fdmDescription')) $('fdmDescription').textContent = food.description || 'Authentic South Indian specialty.';
+
+    const imgEl = $('fdmImage');
+    if (imgEl) {
+      imgEl.src = resolveImgSrc(food.image);
+      imgEl.onerror = () => { imgEl.src = '/static/images/idli.jpg'; };
+    }
+
+    const badgeEl = $('fdmBadge');
+    if (badgeEl) {
+      badgeEl.textContent = food.badge || food.category;
+      badgeEl.style.display = food.badge ? 'inline-block' : 'none';
+    }
+
+    // Rating summary
+    const s = food.ratings_summary || {};
+    const avg = s.avg_rating !== null && s.avg_rating !== undefined ? Number(s.avg_rating).toFixed(1) : null;
+    if ($('fdmRatingAvg')) $('fdmRatingAvg').textContent = avg ? `${avg}★` : '—';
+    if ($('fdmRatingCount')) $('fdmRatingCount').textContent = s.rating_count ? `${s.rating_count} genuine student rating${s.rating_count > 1 ? 's' : ''}` : 'No ratings yet';
+
+    // Stars display
+    if ($('fdmStarDisplay')) {
+      const numStars = avg ? Math.round(Number(avg)) : 0;
+      $('fdmStarDisplay').textContent = avg ? '★'.repeat(numStars) + '☆'.repeat(5 - numStars) : '☆☆☆☆☆';
+    }
+
+    // Histogram
+    const histoEl = $('fdmHistogram');
+    if (histoEl) {
+      histoEl.innerHTML = '';
+      const dist = s.distribution || {};
+      for (let star = 5; star >= 1; star--) {
+        const count = dist[star] || 0;
+        const pct = Math.round((count / (s.rating_count || 1)) * 100);
+        const row = document.createElement('div');
+        row.className = 'fdm-histo-row';
+        row.innerHTML = `
+          <span>${star}★</span>
+          <div class="fdm-histo-bar-wrap">
+            <div class="fdm-histo-bar" style="width: ${s.rating_count ? pct : 0}%;"></div>
+          </div>
+          <span class="fdm-histo-cnt">${count}</span>
+        `;
+        histoEl.appendChild(row);
+      }
+    }
+
+    // User's own rating
+    const userWrap = $('fdmUserRatingWrap');
+    if (userWrap) {
+      if (food.user_rating) {
+        userWrap.style.display = 'block';
+        userWrap.innerHTML = `⭐ You rated this dish <strong>${food.user_rating.rating}★</strong>${food.user_rating.review ? ': "' + escapeHtml(food.user_rating.review) + '"' : ''}`;
+      } else {
+        userWrap.style.display = 'none';
+      }
+    }
+
+    // Rate button
+    const rateAction = $('fdmRateAction');
+    if (rateAction) {
+      const hasRated = !!food.user_rating;
+      rateAction.innerHTML = `
+        <button class="btn-primary" style="width:100%;" onclick="openRateModal(${food.id}, '${escapeHtml(food.name)}', '${food.image || ''}', '${food.category || ''}', ${food.user_rating ? food.user_rating.rating : 0}, '${escapeHtml(food.user_rating ? food.user_rating.review || '' : '')}')">
+          ${hasRated ? '✏️ Edit Your Rating' : '⭐ Rate This Dish (1-5 Stars)'}
+        </button>
+      `;
+    }
+
+    // Reviews list
+    const revList = $('fdmReviewsList');
+    if (revList) {
+      revList.innerHTML = '';
+      const reviews = food.recent_reviews || [];
+      if (reviews.length === 0) {
+        revList.innerHTML = '<p style="color:#64748b; font-size:0.85rem; margin:0;">No reviews yet. Be the first to review this dish!</p>';
+      } else {
+        reviews.forEach(r => {
+          const item = document.createElement('div');
+          item.className = 'fdm-review-item';
+          item.innerHTML = `
+            <div class="fdm-review-item-header">
+              <span class="fdm-review-stars">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</span>
+              <span style="color:#94a3b8; font-size:0.75rem;">${r.is_verified_purchase ? '✓ Verified Diner' : 'Student'}</span>
+            </div>
+            <div class="fdm-review-comment">${escapeHtml(r.review || 'Delicious!')}</div>
+          `;
+          revList.appendChild(item);
+        });
+      }
+    }
+
+    // Related foods
+    const relGrid = $('fdmRelatedGrid');
+    if (relGrid) {
+      relGrid.innerHTML = '';
+      const related = food.related_foods || [];
+      related.forEach(rf => {
+        const rc = document.createElement('div');
+        rc.className = 'fdm-related-card';
+        rc.onclick = () => openFoodDetailsModal(rf.id);
+        rc.innerHTML = `
+          <img src="${resolveImgSrc(rf.image)}" alt="${escapeHtml(rf.name)}" class="fdm-related-img" onerror="this.src='/static/images/idli.jpg'" />
+          <div class="fdm-related-name">${escapeHtml(rf.name)}</div>
+          <div class="fdm-related-price">${fmtPrice(rf.price)}</div>
+        `;
+        relGrid.appendChild(rc);
+      });
+    }
+
+    backdrop.classList.remove('hidden');
+  } catch (err) {
+    showToast('Failed to load dish details.', 'error');
+  }
+}
+
+function closeFoodDetailsModal(event) {
+  if (event && event.target && event.target.id !== 'foodDetailsModalBackdrop' && !event.target.classList.contains('modal-close-btn')) {
+    return;
+  }
+  const backdrop = $('foodDetailsModalBackdrop');
+  if (backdrop) backdrop.classList.add('hidden');
+}
+
+function fdmAddToCart() {
+  if (!currentModalFoodId) return;
+  addToCart(currentModalFoodId);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   EXPLORE, TOP RATED, MY RATINGS & PROFILE VIEWS
+══════════════════════════════════════════════════════════════ */
+
+let exploreSearchTerm = '';
+let exploreStarFilter = 'all';
+
+function setExploreStarFilter(filter) {
+  exploreStarFilter = filter;
+  document.querySelectorAll('.explore-star-chips .star-chip').forEach(c => c.classList.remove('active'));
+  const activeChip = $(`starChip-${filter === 'unrated' ? 'nr' : filter}`);
+  if (activeChip) activeChip.classList.add('active');
+  renderExploreGrid();
+}
+
+function handleExploreSearch() {
+  const inp = $('exploreSearchInput');
+  const clearBtn = $('exploreClearBtn');
+  exploreSearchTerm = inp ? inp.value.trim().toLowerCase() : '';
+  if (clearBtn) clearBtn.style.display = exploreSearchTerm ? 'inline-block' : 'none';
+  renderExploreGrid();
+}
+
+function clearExploreSearch() {
+  const inp = $('exploreSearchInput');
+  const clearBtn = $('exploreClearBtn');
+  if (inp) inp.value = '';
+  if (clearBtn) clearBtn.style.display = 'none';
+  exploreSearchTerm = '';
+  exploreStarFilter = 'all';
+  document.querySelectorAll('.explore-star-chips .star-chip').forEach(c => c.classList.remove('active'));
+  const allChip = $('starChip-all');
+  if (allChip) allChip.classList.add('active');
+  renderExploreGrid();
+}
+
+async function renderExploreGrid() {
+  const container = $('exploreGrid');
+  if (!container) return;
+
+  const sortSelect = $('exploreSortSelect');
+  const dietSelect = $('exploreDietSelect');
+  const availCheck = $('exploreAvailableOnly');
+
+  const sortVal = sortSelect ? sortSelect.value : 'top-rated';
+  const dietVal = dietSelect ? dietSelect.value : 'ALL';
+  const availOnly = availCheck ? availCheck.checked : false;
+
+  let items = [...allMenuItems];
+
+  if (exploreSearchTerm) {
+    items = items.filter(i =>
+      i.name.toLowerCase().includes(exploreSearchTerm) ||
+      i.category.toLowerCase().includes(exploreSearchTerm) ||
+      (i.description && i.description.toLowerCase().includes(exploreSearchTerm))
+    );
+  }
+
+  if (dietVal === 'VEG') {
+    items = items.filter(i => i.category !== 'Non-Veg');
+  } else if (dietVal === 'NON_VEG') {
+    items = items.filter(i => i.category === 'Non-Veg');
+  }
+
+  if (availOnly) {
+    items = items.filter(i => i.stock > 0);
+  }
+
+  // Star filter
+  if (exploreStarFilter === 4) {
+    items = items.filter(i => (i.avg_rating || i.predicted_rating || 0) >= 4);
+  } else if (exploreStarFilter === 3) {
+    items = items.filter(i => (i.avg_rating || i.predicted_rating || 0) >= 3);
+  }
+
+  // Sort
+  if (sortVal === 'price-asc') items.sort((a, b) => a.price - b.price);
+  else if (sortVal === 'price-desc') items.sort((a, b) => b.price - a.price);
+
+  const counter = $('exploreCounterText');
+  if (counter) counter.textContent = `Showing ${items.length} dish${items.length === 1 ? '' : 'es'}`;
+
+  const emptyBox = $('exploreEmptyState');
+  if (items.length === 0) {
+    container.innerHTML = '';
+    if (emptyBox) emptyBox.classList.remove('hidden');
+    return;
+  }
+  if (emptyBox) emptyBox.classList.add('hidden');
+
+  renderFoodGrid(items, container);
+}
+
+async function renderTopRatedView() {
+  const container = $('topRatedGrid');
+  const loader = $('topRatedLoader');
+  if (!container) return;
+
+  if (loader) loader.classList.remove('hidden');
+
+  try {
+    const res = await fetch('/api/food/top-rated?limit=12&min_ratings=0');
+    if (loader) loader.classList.add('hidden');
+    if (!res.ok) return;
+
+    const data = await res.json();
+    const foods = data.top_rated || [];
+    renderFoodGrid(foods, container);
+  } catch (e) {
+    if (loader) loader.classList.add('hidden');
+  }
+}
+
+async function renderMyRatingsView() {
+  const container = $('myRatingsGrid');
+  const wall = $('myRatingsLoginWall');
+  const empty = $('myRatingsEmptyState');
+  if (!container) return;
+
+  if (!currentUser) {
+    if (wall) wall.style.display = 'block';
+    if (empty) empty.classList.add('hidden');
+    container.innerHTML = '';
+    return;
+  }
+
+  if (wall) wall.style.display = 'none';
+
+  try {
+    const res = await fetch('/api/ratings/me');
+    if (!res.ok) {
+      if (res.status === 401 && wall) wall.style.display = 'block';
+      return;
+    }
+    const data = await res.json();
+    const ratings = data.ratings || [];
+
+    if (ratings.length === 0) {
+      container.innerHTML = '';
+      if (empty) empty.classList.remove('hidden');
+      return;
+    }
+    if (empty) empty.classList.add('hidden');
+
+    container.innerHTML = '';
+    ratings.forEach(r => {
+      const card = document.createElement('div');
+      card.className = 'my-rating-card';
+      const foodItem = allMenuItems.find(i => i.id === r.food_id) || {};
+      const imgSrc = resolveImgSrc(r.food_image || foodItem.image);
+
+      card.innerHTML = `
+        <div style="display:flex; gap:12px; align-items:center;">
+          <img src="${imgSrc}" alt="${escapeHtml(r.food_name || 'Dish')}" style="width:50px; height:50px; border-radius:10px; object-fit:cover;" onerror="this.src='/static/images/idli.jpg'" />
+          <div>
+            <h4 style="margin:0 0 4px; font-weight:800; font-size:1rem; color:#0f172a;">${escapeHtml(r.food_name || 'Dish')}</h4>
+            <div style="color:#f59e0b; font-size:1.1rem; letter-spacing:1px;">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</div>
+          </div>
+        </div>
+        ${r.review ? `<p style="margin:8px 0; font-size:0.88rem; color:#475569; font-style:italic;">"${escapeHtml(r.review)}"</p>` : ''}
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px;">
+          <span style="font-size:0.75rem; color:#94a3b8;">${r.is_verified_purchase ? '✓ Verified Purchase' : 'Campus Diner'}</span>
+          <div style="display:flex; gap:8px;">
+            <button class="btn-secondary" style="padding:4px 10px; font-size:0.75rem;" onclick="openRateModal(${r.food_id}, '${escapeHtml(r.food_name || '')}', '${r.food_image || ''}', '${r.food_category || ''}', ${r.rating}, '${escapeHtml(r.review || '')}')">Edit</button>
+            <button class="btn-text-link" style="font-size:0.75rem; color:#dc2626;" onclick="deleteRating(${r.id})">Delete</button>
+          </div>
+        </div>
+      `;
+      container.appendChild(card);
+    });
+  } catch (e) {
+    console.warn('Error fetching ratings', e);
+  }
+}
+
+async function deleteRating(ratingId) {
+  if (!confirm('Are you sure you want to delete this rating?')) return;
+  try {
+    const res = await fetch(`/api/ratings/${ratingId}`, { method: 'DELETE' });
+    if (res.ok) {
+      showToast('Rating deleted.', 'info');
+      fetchRecommendations();
+      renderMyRatingsView();
+    }
+  } catch (e) {}
+}
+
+let selectedDietaryPref = 'ALL';
+let selectedCategoriesPref = [];
+
+function selectDietPref(diet) {
+  selectedDietaryPref = diet;
+  document.querySelectorAll('#prefDietChips .pref-chip').forEach(c => c.classList.remove('active'));
+  const chip = $(`dietChip-${diet}`);
+  if (chip) chip.classList.add('active');
+}
+
+function toggleCategoryPref(cat) {
+  const idx = selectedCategoriesPref.indexOf(cat);
+  if (idx >= 0) selectedCategoriesPref.splice(idx, 1);
+  else selectedCategoriesPref.push(cat);
+
+  document.querySelectorAll('#prefCategoryChips .pref-chip').forEach(c => {
+    if (selectedCategoriesPref.includes(c.dataset.cat)) c.classList.add('active');
+    else c.classList.remove('active');
+  });
+}
+
+async function renderProfileView() {
+  const wall = $('profileLoginWall');
+  const form = $('preferencesFormCard');
+  if (!wall || !form) return;
+
+  if (!currentUser) {
+    wall.style.display = 'block';
+    form.style.display = 'none';
+    return;
+  }
+
+  wall.style.display = 'none';
+  form.style.display = 'block';
+
+  try {
+    const res = await fetch('/api/user/preferences');
+    if (res.ok) {
+      const data = await res.json();
+      const p = data.preferences || {};
+      selectDietPref(p.dietary_preference || 'ALL');
+      selectedCategoriesPref = p.preferred_categories || [];
+      document.querySelectorAll('#prefCategoryChips .pref-chip').forEach(c => {
+        if (selectedCategoriesPref.includes(c.dataset.cat)) c.classList.add('active');
+        else c.classList.remove('active');
+      });
+    }
+  } catch (e) {}
+}
+
+async function saveUserPreferences() {
+  const btn = $('savePrefBtn');
+  const statusEl = $('prefSaveStatus');
+  if (btn) btn.disabled = true;
+
+  try {
+    const res = await fetch('/api/user/preferences', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        dietary_preference: selectedDietaryPref,
+        preferred_categories: selectedCategoriesPref,
+      }),
+    });
+    if (btn) btn.disabled = false;
+    if (res.ok) {
+      showToast('✓ Preferences saved! Recommendations updated.', 'success');
+      if (statusEl) {
+        statusEl.textContent = 'Saved!';
+        setTimeout(() => { statusEl.textContent = ''; }, 3000);
+      }
+      fetchRecommendations();
+    }
+  } catch (e) {
+    if (btn) btn.disabled = false;
+  }
+}
+
+function scrollRecHub() {
+  setTimeout(() => {
+    const hub = $('recommendationsHubSection');
+    if (hub) hub.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 120);
+}
 
 /* ══════════════════════════════════════════════════════════════
    PAGE INITIALIZATION

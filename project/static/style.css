@@ -5691,3 +5691,757 @@ input[type="password"], input[type="number"] {
   }
 }
 
+/* ══════════════════════════════════════════════════════════════
+   ⭐ 5-STAR RATING & FOOD INTELLIGENCE MODALS & VIEWS
+══════════════════════════════════════════════════════════════ */
+
+/* Keyframe Animations */
+@keyframes modalPop {
+  0% { transform: scale(0.92); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes starPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.3); }
+  100% { transform: scale(1); }
+}
+
+@keyframes fadeInUp {
+  0% { opacity: 0; transform: translateY(10px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+/* Rate Dish Modal Box */
+.rate-modal-box {
+  background: #ffffff;
+  border-radius: 22px;
+  width: 100%;
+  max-width: 480px;
+  padding: 26px 28px;
+  box-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.35);
+  position: relative;
+  animation: modalPop 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-sizing: border-box;
+}
+
+.rate-food-preview {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: #f8fafc;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+}
+
+.rate-food-img {
+  width: 54px;
+  height: 54px;
+  border-radius: 12px;
+  object-fit: cover;
+  border: 1px solid #cbd5e1;
+  flex-shrink: 0;
+}
+
+.rate-food-name {
+  font-weight: 800;
+  font-size: 1.05rem;
+  color: #0f172a;
+}
+
+.rate-food-category {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+/* 5-Star Selector */
+.star-selector {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin: 16px 0 8px;
+}
+
+.star-btn {
+  background: none;
+  border: none;
+  font-size: 2.4rem;
+  line-height: 1;
+  color: #cbd5e1;
+  cursor: pointer;
+  padding: 4px;
+  transition: transform 0.15s ease, color 0.15s ease;
+  user-select: none;
+  outline: none;
+}
+
+.star-btn:hover {
+  transform: scale(1.25);
+  color: #fbbf24;
+}
+
+.star-btn.selected,
+.star-btn.active {
+  color: #f59e0b;
+  text-shadow: 0 0 14px rgba(245, 158, 11, 0.45);
+}
+
+.star-btn.pulse {
+  animation: starPulse 0.3s ease;
+}
+
+.star-label {
+  text-align: center;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #475569;
+  margin-bottom: 18px;
+  min-height: 24px;
+}
+
+.rate-review-wrap {
+  margin-bottom: 22px;
+}
+
+.rate-review-label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #334155;
+  margin-bottom: 6px;
+}
+
+.rate-review-input {
+  width: 100%;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  resize: vertical;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.rate-review-input:focus {
+  border-color: var(--brand-red, #c8102e);
+  box-shadow: 0 0 0 3px rgba(200, 16, 46, 0.12);
+}
+
+.rate-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   TOKEN CONFIRMATION SCREEN: RATING PROMPT CARD
+══════════════════════════════════════════════════════════════ */
+.token-rating-prompt {
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  border: 1.5px solid #fde68a;
+  border-radius: 18px;
+  padding: 22px;
+  margin: 22px 0;
+  text-align: left;
+  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.14);
+}
+
+.token-rating-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.token-rating-icon {
+  font-size: 1.8rem;
+  line-height: 1;
+}
+
+.token-rating-title {
+  font-size: 1.1rem;
+  font-weight: 900;
+  color: #78350f;
+  margin: 0 0 4px;
+}
+
+.token-rating-subtitle {
+  font-size: 0.85rem;
+  color: #92400e;
+  margin: 0;
+  line-height: 1.45;
+}
+
+.token-rating-items {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.token-rating-item-card {
+  background: #ffffff;
+  border: 1.5px solid #fcd34d;
+  border-radius: 14px;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.token-rating-item-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.1);
+}
+
+.token-rating-dish-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 160px;
+}
+
+.token-dish-thumb {
+  width: 46px;
+  height: 46px;
+  border-radius: 10px;
+  object-fit: cover;
+  border: 1px solid #e2e8f0;
+}
+
+.token-dish-name {
+  font-weight: 800;
+  font-size: 0.95rem;
+  color: #1e293b;
+}
+
+.token-dish-qty {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+.token-item-stars-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.token-item-star-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #cbd5e1;
+  cursor: pointer;
+  line-height: 1;
+  padding: 3px;
+  transition: transform 0.15s, color 0.15s;
+}
+
+.token-item-star-btn:hover {
+  transform: scale(1.3);
+  color: #f59e0b;
+}
+
+.token-item-star-btn.active {
+  color: #f59e0b;
+  text-shadow: 0 0 10px rgba(245, 158, 11, 0.4);
+}
+
+.token-item-rated-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #ecfdf5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+  padding: 6px 12px;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 800;
+  animation: fadeInUp 0.25s ease;
+}
+
+/* Post-Rating AI Recommendations Notice */
+.token-rec-feedback-box {
+  margin-top: 18px;
+  background: #ffffff;
+  border: 2px solid #10b981;
+  border-radius: 14px;
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  box-shadow: 0 6px 18px rgba(16, 185, 129, 0.18);
+  animation: fadeInUp 0.3s ease;
+  flex-wrap: wrap;
+}
+
+.token-rec-feedback-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.token-rec-sparkle {
+  font-size: 1.8rem;
+}
+
+.token-rec-text strong {
+  display: block;
+  font-size: 0.95rem;
+  color: #065f46;
+  font-weight: 800;
+}
+
+.token-rec-text span {
+  font-size: 0.82rem;
+  color: #047857;
+  font-weight: 600;
+}
+
+/* Recommendation Card Action Links */
+.rec-card-bottom-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+.btn-rate-dish-pill {
+  background: #fffbeb;
+  color: #b45309;
+  border: 1.5px solid #fde68a;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.btn-rate-dish-pill:hover {
+  background: #fef3c7;
+  color: #92400e;
+  border-color: #f59e0b;
+  transform: translateY(-1px);
+}
+
+.btn-detail-link {
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-detail-link:hover {
+  background: #e2e8f0;
+  color: #1e293b;
+}
+
+.rec-card-stars {
+  background: #fffbeb;
+  color: #b45309;
+  font-size: 0.75rem;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 6px;
+  border: 1px solid #fef3c7;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   FOOD DETAILS MODAL
+══════════════════════════════════════════════════════════════ */
+.food-details-modal-box {
+  background: #ffffff;
+  border-radius: 24px;
+  width: 100%;
+  max-width: 580px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.35);
+  position: relative;
+  animation: modalPop 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-sizing: border-box;
+}
+
+.food-details-modal-box .modal-close-btn {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 10;
+  background: rgba(15, 23, 42, 0.7);
+  color: #ffffff;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+  font-size: 1.2rem;
+  backdrop-filter: blur(4px);
+}
+
+.fdm-image-wrap {
+  position: relative;
+  width: 100%;
+  height: 220px;
+  overflow: hidden;
+  border-radius: 24px 24px 0 0;
+  background: #0f172a;
+}
+
+.fdm-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.fdm-badge-overlay {
+  position: absolute;
+  bottom: 12px;
+  left: 16px;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(4px);
+  color: #ffffff;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.fdm-content {
+  padding: 24px;
+}
+
+.fdm-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.fdm-title {
+  font-size: 1.35rem;
+  font-weight: 900;
+  color: #0f172a;
+  margin: 0;
+}
+
+.fdm-category {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #64748b;
+  margin-top: 2px;
+  display: inline-block;
+}
+
+.fdm-price {
+  font-size: 1.35rem;
+  font-weight: 900;
+  color: var(--brand-red, #c8102e);
+}
+
+.fdm-meta-row {
+  display: flex;
+  gap: 12px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #475569;
+  margin-bottom: 14px;
+  background: #f8fafc;
+  padding: 8px 12px;
+  border-radius: 10px;
+}
+
+.fdm-description {
+  font-size: 0.92rem;
+  color: #475569;
+  line-height: 1.5;
+  margin-bottom: 18px;
+}
+
+.fdm-rating-section {
+  background: #f8fafc;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 18px;
+  margin-bottom: 18px;
+}
+
+.fdm-rating-headline {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.fdm-rating-avg {
+  font-size: 2.2rem;
+  font-weight: 900;
+  color: #0f172a;
+  line-height: 1;
+}
+
+.fdm-star-display {
+  color: #f59e0b;
+  font-size: 1.15rem;
+  letter-spacing: 2px;
+}
+
+.fdm-rating-count {
+  font-size: 0.82rem;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.fdm-rating-histogram {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 12px 0 16px;
+}
+
+.fdm-histo-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #64748b;
+}
+
+.fdm-histo-bar-wrap {
+  flex: 1;
+  height: 6px;
+  background: #e2e8f0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.fdm-histo-bar {
+  height: 100%;
+  background: #f59e0b;
+  border-radius: 4px;
+}
+
+.fdm-histo-cnt {
+  width: 28px;
+  text-align: right;
+  font-size: 0.78rem;
+}
+
+.fdm-user-rating-wrap {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-bottom: 12px;
+  font-size: 0.85rem;
+  color: #1e40af;
+  font-weight: 700;
+}
+
+.fdm-reviews-section {
+  margin-bottom: 18px;
+}
+
+.fdm-reviews-title {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 10px;
+}
+
+.fdm-review-item {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-bottom: 8px;
+}
+
+.fdm-review-item-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.82rem;
+  margin-bottom: 4px;
+}
+
+.fdm-review-stars {
+  color: #f59e0b;
+  font-weight: 800;
+}
+
+.fdm-review-comment {
+  font-size: 0.85rem;
+  color: #475569;
+}
+
+.fdm-related-section {
+  margin-bottom: 18px;
+}
+
+.fdm-related-title {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 10px;
+}
+
+.fdm-related-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 10px;
+}
+
+.fdm-related-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 8px;
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.2s, border-color 0.2s;
+  background: #ffffff;
+}
+
+.fdm-related-card:hover {
+  transform: translateY(-2px);
+  border-color: #cbd5e1;
+}
+
+.fdm-related-img {
+  width: 100%;
+  height: 64px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 6px;
+}
+
+.fdm-related-name {
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #1e293b;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.fdm-related-price {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--brand-red, #c8102e);
+}
+
+.fdm-cart-action {
+  margin-top: 16px;
+}
+
+.fdm-cart-action button {
+  width: 100%;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   EXPLORE, TOP RATED, MY RATINGS & PROFILE VIEWS
+══════════════════════════════════════════════════════════════ */
+.explore-filter-bar {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.explore-star-chips {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.star-chip {
+  background: #f8fafc;
+  border: 1.5px solid #e2e8f0;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.star-chip.active {
+  background: #fef3c7;
+  border-color: #f59e0b;
+  color: #b45309;
+}
+
+.my-ratings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 18px;
+  margin-top: 20px;
+}
+
+.my-rating-card {
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.pref-diet-chips,
+.pref-category-chips {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.pref-chip {
+  background: #f8fafc;
+  border: 1.5px solid #e2e8f0;
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.pref-chip.active {
+  background: linear-gradient(135deg, var(--brand-red, #c8102e), #ea580c);
+  color: #ffffff;
+  border-color: transparent;
+}
+
+
