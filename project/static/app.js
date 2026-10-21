@@ -198,6 +198,12 @@ function showToast(msg, type = 'info') {
   }, 2600);
 }
 
+/** Clear all active toasts immediately */
+function clearAllToasts() {
+  const container = $('toastWrap');
+  if (container) container.innerHTML = '';
+}
+
 /** Pure CSS/JS Confetti celebration */
 function launchCelebrationConfetti() {
   const sky = $('confettiContainer');
@@ -1200,9 +1206,12 @@ async function processOrderPayment() {
   }
 
   const items = Object.values(cart).map(it => ({
+    id: it.id,
     name: it.name,
     qty: it.qty,
     price: it.price,
+    image: it.image,
+    category: it.category,
   }));
   const total = items.reduce((s, it) => s + it.qty * it.price, 0);
 
@@ -1312,30 +1321,36 @@ function populateTokenConfirmation(data, orderedItems, total) {
   if (ratingListEl && orderedItems && orderedItems.length > 0) {
     ratingListEl.innerHTML = '';
     orderedItems.forEach(item => {
-      const imgSrc = resolveImgSrc(item.image);
+      const matched = (allMenuItems || []).find(m => (item.id && m.id === item.id) || (m.name && item.name && m.name.toLowerCase() === item.name.toLowerCase())) || {};
+      const itemId = item.id || matched.id || 0;
+      const itemName = item.name || matched.name || 'Dish';
+      const itemImg = item.image || matched.image || '';
+      const itemCategory = item.category || matched.category || '';
+      const itemPrice = item.price || matched.price || 0;
+      const imgSrc = resolveImgSrc(itemImg);
       const card = document.createElement('div');
       card.className = 'token-rating-item-card';
-      card.id = `token-rate-item-${item.id}`;
+      card.id = `token-rate-item-${itemId}`;
 
       card.innerHTML = `
         <div class="token-rating-dish-info">
-          <img src="${imgSrc}" alt="${escapeHtml(item.name)}" class="token-dish-thumb" onerror="this.src='/static/images/idli.jpg'" />
+          <img src="${imgSrc}" alt="${escapeHtml(itemName)}" class="token-dish-thumb" onerror="this.src='/static/images/idli.jpg'" />
           <div>
-            <div class="token-dish-name">${escapeHtml(item.name)}</div>
-            <div class="token-dish-qty">Qty: ${item.qty} • ${fmtPrice(item.price)}</div>
+            <div class="token-dish-name">${escapeHtml(itemName)}</div>
+            <div class="token-dish-qty">Qty: ${item.qty} • ${fmtPrice(itemPrice)}</div>
           </div>
         </div>
 
-        <div class="token-item-stars-action" id="token-dish-action-${item.id}">
+        <div class="token-item-stars-action" id="token-dish-action-${itemId}">
           <div class="token-item-stars-row" title="Rate out of 5 stars">
-            <button class="token-item-star-btn" data-star="1" onclick="quickRateOrderedDish(${item.id}, 1, '${escapeHtml(item.name)}')" title="1 Star - Poor">★</button>
-            <button class="token-item-star-btn" data-star="2" onclick="quickRateOrderedDish(${item.id}, 2, '${escapeHtml(item.name)}')" title="2 Stars - Fair">★</button>
-            <button class="token-item-star-btn" data-star="3" onclick="quickRateOrderedDish(${item.id}, 3, '${escapeHtml(item.name)}')" title="3 Stars - Good">★</button>
-            <button class="token-item-star-btn" data-star="4" onclick="quickRateOrderedDish(${item.id}, 4, '${escapeHtml(item.name)}')" title="4 Stars - Very Good">★</button>
-            <button class="token-item-star-btn" data-star="5" onclick="quickRateOrderedDish(${item.id}, 5, '${escapeHtml(item.name)}')" title="5 Stars - Loved It!">★</button>
+            <button class="token-item-star-btn" data-star="1" onclick="quickRateOrderedDish(${itemId}, 1, '${escapeHtml(itemName)}')" title="1 Star - Poor">★</button>
+            <button class="token-item-star-btn" data-star="2" onclick="quickRateOrderedDish(${itemId}, 2, '${escapeHtml(itemName)}')" title="2 Stars - Fair">★</button>
+            <button class="token-item-star-btn" data-star="3" onclick="quickRateOrderedDish(${itemId}, 3, '${escapeHtml(itemName)}')" title="3 Stars - Good">★</button>
+            <button class="token-item-star-btn" data-star="4" onclick="quickRateOrderedDish(${itemId}, 4, '${escapeHtml(itemName)}')" title="4 Stars - Very Good">★</button>
+            <button class="token-item-star-btn" data-star="5" onclick="quickRateOrderedDish(${itemId}, 5, '${escapeHtml(itemName)}')" title="5 Stars - Loved It!">★</button>
           </div>
           <div style="text-align:right;">
-            <button class="btn-text-link" style="font-size:0.75rem; margin-top:4px;" onclick="openRateModal(${item.id}, '${escapeHtml(item.name)}', '${item.image || ''}', '${item.category || ''}')">
+            <button class="btn-text-link" style="font-size:0.75rem; margin-top:4px;" onclick="openRateModal(${itemId}, '${escapeHtml(itemName)}', '${itemImg}', '${itemCategory}')">
               ✍️ Review
             </button>
           </div>
@@ -2344,7 +2359,13 @@ function openRateModal(foodId, foodName, foodImg, foodCategory, preRating = 0, p
     return;
   }
 
-  currentRatingFoodId = foodId ? parseInt(foodId, 10) : null;
+  let resolvedId = foodId ? parseInt(foodId, 10) : null;
+  if ((!resolvedId || isNaN(resolvedId)) && foodName && typeof allMenuItems !== 'undefined') {
+    const matched = allMenuItems.find(m => m.name && m.name.toLowerCase() === foodName.trim().toLowerCase());
+    if (matched) resolvedId = matched.id;
+  }
+
+  currentRatingFoodId = resolvedId;
   currentRatingStars = preRating ? parseInt(preRating, 10) : 0;
 
   if ($('rateFoodName')) $('rateFoodName').textContent = foodName || '';
@@ -2409,6 +2430,17 @@ async function submitRating() {
     showToast('Please sign in to submit a rating.', 'info');
     return;
   }
+
+  // Fallback: If currentRatingFoodId is not set, resolve from modal preview name
+  if (!currentRatingFoodId) {
+    const nameEl = $('rateFoodName');
+    const dishName = nameEl ? nameEl.textContent.trim() : '';
+    if (dishName && typeof allMenuItems !== 'undefined') {
+      const matched = allMenuItems.find(m => m.name && m.name.toLowerCase() === dishName.toLowerCase());
+      if (matched) currentRatingFoodId = matched.id;
+    }
+  }
+
   if (!currentRatingFoodId) {
     showToast('Please select a dish to rate.', 'warning');
     return;
@@ -2418,6 +2450,9 @@ async function submitRating() {
     showToast('Please select between 1 and 5 stars.', 'warning');
     return;
   }
+
+  // Clear any previous warning / dish toasts before proceeding
+  clearAllToasts();
 
   const reviewText = $('rateReviewInput') ? $('rateReviewInput').value.trim() : '';
   const btn = $('submitRatingBtn');
@@ -2447,18 +2482,21 @@ async function submitRating() {
       currentUser = null;
       updateAuthHeaderUI();
       closeRateModal(null);
+      clearAllToasts();
       openGuestRequiredModal();
       showToast('Session expired. Please sign in to submit your rating.', 'warning');
       return;
     }
 
     if (!res.ok || !data.success) {
+      clearAllToasts();
       showToast(data.message || 'Failed to submit rating.', 'error');
       return;
     }
 
     closeRateModal(null);
-    showToast(`⭐ Rating submitted! Personalized recommendations updated.`, 'success');
+    clearAllToasts();
+    showToast('⭐ Rating successfully submitted!', 'success');
 
     // Update Token Confirmation view if currently on it
     const tokenActionEl = $(`token-dish-action-${currentRatingFoodId}`);
