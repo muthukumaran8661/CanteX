@@ -2339,14 +2339,15 @@ const STAR_LABELS = {
 /** Open 5-Star Rating Modal */
 function openRateModal(foodId, foodName, foodImg, foodCategory, preRating = 0, preReview = '') {
   if (!currentUser) {
+    closeRateModal(null);
     openGuestRequiredModal();
     return;
   }
 
-  currentRatingFoodId = foodId;
-  currentRatingStars = preRating || 0;
+  currentRatingFoodId = foodId ? parseInt(foodId, 10) : null;
+  currentRatingStars = preRating ? parseInt(preRating, 10) : 0;
 
-  if ($('rateFoodName')) $('rateFoodName').textContent = foodName;
+  if ($('rateFoodName')) $('rateFoodName').textContent = foodName || '';
   if ($('rateFoodCategory')) $('rateFoodCategory').textContent = foodCategory || '';
   const img = $('rateFoodImg');
   if (img) {
@@ -2364,7 +2365,7 @@ function openRateModal(foodId, foodName, foodImg, foodCategory, preRating = 0, p
 
 /** Close 5-Star Rating Modal */
 function closeRateModal(event) {
-  if (event && event.target && event.target.id !== 'rateFoodModalBackdrop' && !event.target.classList.contains('modal-close-btn') && !event.target.classList.contains('btn-secondary')) {
+  if (event && event.target && event.target !== $('rateFoodModalBackdrop') && !event.target.classList.contains('modal-close-btn') && !event.target.classList.contains('btn-secondary')) {
     return;
   }
   const backdrop = $('rateFoodModalBackdrop');
@@ -2373,8 +2374,8 @@ function closeRateModal(event) {
 
 /** Select Star in Rate Modal */
 function selectRatingStar(val) {
-  currentRatingStars = val;
-  updateRateModalStarUI(val);
+  currentRatingStars = parseInt(val, 10) || 0;
+  updateRateModalStarUI(currentRatingStars);
 }
 
 /** Update Star Highlighting & Label */
@@ -2403,10 +2404,15 @@ function updateRateModalStarUI(val) {
 /** Submit Rating from Modal */
 async function submitRating() {
   if (!currentUser) {
+    closeRateModal(null);
     openGuestRequiredModal();
+    showToast('Please sign in to submit a rating.', 'info');
     return;
   }
-  if (!currentRatingFoodId) return;
+  if (!currentRatingFoodId) {
+    showToast('Please select a dish to rate.', 'warning');
+    return;
+  }
 
   if (currentRatingStars < 1 || currentRatingStars > 5) {
     showToast('Please select between 1 and 5 stars.', 'warning');
@@ -2430,11 +2436,20 @@ async function submitRating() {
         review: reviewText,
       }),
     });
-    const data = await res.json();
+    const data = await res.json().catch(() => ({}));
 
     if (btn) {
       btn.disabled = false;
       btn.textContent = 'Submit Rating';
+    }
+
+    if (res.status === 401 || data.login_required) {
+      currentUser = null;
+      updateAuthHeaderUI();
+      closeRateModal(null);
+      openGuestRequiredModal();
+      showToast('Session expired. Please sign in to submit your rating.', 'warning');
+      return;
     }
 
     if (!res.ok || !data.success) {
@@ -2460,17 +2475,33 @@ async function submitRating() {
     }
 
     // Refresh recommendations immediately
-    await fetchRecommendations();
-    renderActiveRecTab();
+    try {
+      await fetchRecommendations();
+    } catch (e) {
+      console.warn('Recommendation refresh error:', e);
+    }
+    try {
+      renderActiveRecTab();
+    } catch (e) {
+      console.warn('Rec tab render error:', e);
+    }
 
     // If Food Details Modal is open, reload it
     const fdmBackdrop = $('foodDetailsModalBackdrop');
     if (fdmBackdrop && !fdmBackdrop.classList.contains('hidden') && currentModalFoodId === currentRatingFoodId) {
-      openFoodDetailsModal(currentRatingFoodId);
+      try {
+        openFoodDetailsModal(currentRatingFoodId);
+      } catch (e) {
+        console.warn('Food details modal refresh error:', e);
+      }
     }
 
     // If My Ratings view is active, refresh it
-    renderMyRatingsView();
+    try {
+      renderMyRatingsView();
+    } catch (e) {
+      console.warn('My ratings view refresh error:', e);
+    }
   } catch (err) {
     if (btn) {
       btn.disabled = false;

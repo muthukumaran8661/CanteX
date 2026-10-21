@@ -147,7 +147,7 @@ def login_required(f):
                 return jsonify({
                     "success": False,
                     "login_required": True,
-                    "message": "Please sign in to place an order.",
+                    "message": "Please sign in to continue.",
                 }), 401
             return redirect(url_for("index", login_required="true"))
         return f(*args, **kwargs)
